@@ -14,7 +14,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
         get-job | Remove-Job -Force
         $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03")
         $JobList = @()
-        $Job = (Start-Job -ScriptBlock $SB -Name $MACAddress)
+        $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
         do
         {
             start-sleep -milliseconds 500
@@ -68,7 +68,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
                     get-job | Remove-Job -Force
                     $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03")
                     $JobList = @()
-                    $Job = (Start-Job -ScriptBlock $SB -Name $MACAddress)
+                    $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
                     do
                     {
                         start-sleep -milliseconds 500
