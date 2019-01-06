@@ -18,7 +18,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
             {
                 Write-Host ("$MACAddress is not paired") -ForegroundColor Red
                 Write-Host ("$MACAddress attempting to pair")
-                "info $MACAddress" | bluetoothctl
+                "pair $MACAddress" | bluetoothctl
                 Start-Sleep -Seconds 5
                 foreach ($Line in ("info $MACAddress" | bluetoothctl))
                 {
