@@ -12,7 +12,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
     try
     {
         get-job | Remove-Job -Force
-        $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03")
+        $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03" --listen)
         $JobList = @()
         $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
         do
@@ -66,7 +66,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
                     Write-Host ("$MACAddress is paired") -ForegroundColor Green
                     $PairedStatus = $true
                     get-job | Remove-Job -Force
-                    $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03")
+                    $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03" --listen)
                     $JobList = @()
                     $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
                     do
