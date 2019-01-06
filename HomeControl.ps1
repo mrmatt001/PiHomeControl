@@ -11,9 +11,36 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
 {
     foreach ($Line in ("info $MACAddress" | bluetoothctl))
     {
+        $PairedStatus = $false
         if ($Line -match 'Paired\:\s+(?<PairedStatus>[a-zA-Z]+)') 
         {
-            Write-Host ("$MACAddress paired: " + $Matches.PairedStatus)
+            if ($Matches.PairedStatus -eq 'no') 
+            {
+                Write-Host ("$MACAddress is not paired") -ForegroundColor Red
+                Write-Host ("$MACAddress attempting to pair")
+                "info $MACAddress" | bluetoothctl
+                Start-Sleep -Seconds 5
+                foreach ($Line in ("info $MACAddress" | bluetoothctl))
+                {
+                    if ($Line -match 'Paired\:\s+(?<PairedStatus>[a-zA-Z]+)') 
+                    {
+                        if ($Matches.PairedStatus -eq 'no') 
+                        {
+                            Write-Host ("$MACAddress could not be paired") -ForegroundColor Red
+                        }
+                        else 
+                        {
+                            Write-Host ("$MACAddress is paired") -ForegroundColor Green  
+                            $PairedStatus = $true
+                        }
+                    }
+                }
+            }
+            else 
+            {
+                Write-Host ("$MACAddress is paired") -ForegroundColor Green
+                $PairedStatus = $true
+            }
         }
     }
 }
