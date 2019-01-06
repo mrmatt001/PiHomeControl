@@ -9,30 +9,29 @@ $MACAddresses = @()
 foreach ($Device in ("devices" | bluetoothctl)) { if ($Device -match 'CC-RT-M-BLE') { if ($Device -match '(?<MACAddress>[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+)') { $MACAddresses += $Matches.MACAddress } } }
 foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
 {
-    try
+    $TryAgain = $true
+    get-job | Remove-Job -Force
+    $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03" --listen)
+    $JobList = @()
+    $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
+    do
     {
-        get-job | Remove-Job -Force
-        $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03" --listen)
-        $JobList = @()
-        $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
-        do
-        {
-            start-sleep -milliseconds 500
-            $JobOutput = Get-Job -id $Job.Id | Receive-Job -Keep
-        }
-        until ($JobOutput -match 'Characteristic')
+        start-sleep -milliseconds 500
+        $JobOutput = Get-Job -id $Job.Id | Receive-Job -Keep
+    }
+    until ($JobOutput -match 'Characteristic')
 
-        $TempOutput = Get-Job -id $Job.ID | Receive-Job
-        Get-Job -id $Job.Id | Remove-Job -Force
-        foreach ($Line in $TempOutput)
-        {
-            if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
-            { 
-                Write-Host ("Temperature: " + [Convert]::ToInt64(($Matches.Temp),16)/2 + "C")
-            }
+    $TempOutput = Get-Job -id $Job.ID | Receive-Job
+    Get-Job -id $Job.Id | Remove-Job -Force
+    foreach ($Line in $TempOutput)
+    {
+        if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
+        { 
+            Write-Host ("Temperature: " + [Convert]::ToInt64(($Matches.Temp),16)/2 + "C")
+            $TryAgain = $false
         }
     }
-    catch
+    if ($TryAgain)
     {
         foreach ($Line in ("info $MACAddress" | bluetoothctl))
         {
@@ -67,7 +66,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
                     $PairedStatus = $true
                     get-job | Remove-Job -Force
                     $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03" --listen)
-                    $JobList = @()
+                    #$JobList = @()
                     $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
                     do
                     {
