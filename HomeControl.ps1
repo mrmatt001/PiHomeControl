@@ -10,5 +10,10 @@ foreach ($Device in ("devices" | bluetoothctl)) { if ($Device -match 'CC-RT-M-BL
 $MACAddresses | Select-Object -Unique
 foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
 {
-    "info $MACAddress" | bluetoothctl
+    foreach ($Line in ("info $MACAddress" | bluetoothctl))
+    if ($Line -match 'Paired\:\s+(?<PairedStatus>[a-zA-Z]+') 
+    {
+        Write-Host ("$MACAddress paired: " + $Matches.PairedStatus)
+    }
 }
+systemctl stop bluetooth
