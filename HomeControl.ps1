@@ -11,7 +11,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
 {
     foreach ($Line in ("info $MACAddress" | bluetoothctl))
     {
-        if ($Line -match 'Paired\:\s+(?<PairedStatus>[a-zA-Z]+') 
+        if ($Line -match 'Paired\:\s+(?<PairedStatus>[a-zA-Z]+)') 
         {
             Write-Host ("$MACAddress paired: " + $Matches.PairedStatus)
         }
