@@ -65,6 +65,26 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
                 {
                     Write-Host ("$MACAddress is paired") -ForegroundColor Green
                     $PairedStatus = $true
+                    get-job | Remove-Job -Force
+                    $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03")
+                    $JobList = @()
+                    $Job = (Start-Job -ScriptBlock $SB -Name $MACAddress)
+                    do
+                    {
+                        start-sleep -milliseconds 500
+                        $JobOutput = Get-Job -id $Job.Id | Receive-Job -Keep
+                    }
+                    until ($JobOutput -match 'Characteristic')
+
+                    $TempOutput = Get-Job -id $Job.ID | Receive-Job
+                    Get-Job -id $Job.Id | Remove-Job -Force
+                    foreach ($Line in $TempOutput)
+                    {
+                        if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
+                        { 
+                            Write-Host ("Temperature: " + [Convert]::ToInt64(($Matches.Temp),16)/2 + "C")
+                        }
+                    }
                 }
             }
         }
