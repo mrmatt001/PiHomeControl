@@ -17,6 +17,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
     do
     {
         start-sleep -milliseconds 500
+        Get-Job -id $Job.Id | Receive-Job -Keep
         $JobOutput = Get-Job -id $Job.Id | Receive-Job -Keep
     }
     until ($JobOutput -match 'Characteristic')
