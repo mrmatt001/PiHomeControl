@@ -14,7 +14,7 @@ foreach ($MACAddress in $MACAddresses)
     #$TryAgain = $true
     get-job | Remove-Job -Force
     $scriptBlock = [scriptblock]::Create("gatttool -b " + $MACAddress + ' --char-write-req -a "0x0411" -n "03" --listen')
-    Write-Host "Waiting for job to finish on $MACAddress"
+    #Write-Host "Waiting for job to finish on $MACAddress"
     $Job = (Start-Job -Name $MACAddress -ScriptBlock $scriptBlock -ArgumentList $MACAddress)
     do
     {
@@ -26,7 +26,7 @@ foreach ($MACAddress in $MACAddresses)
     
     $TempOutput = Get-Job -id $Job.ID | Receive-Job
     Get-Job -id $Job.Id | Remove-Job -Force
-    Write-Host "Job has returned on $MACAddress"
+    #Write-Host "Job has returned on $MACAddress"
     foreach ($Line in $TempOutput)
     {
         if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
