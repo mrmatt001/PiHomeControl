@@ -7,14 +7,15 @@ modprobe btusb
 systemctl start bluetooth
 $MACAddresses = @()
 foreach ($Device in ("devices" | bluetoothctl)) { if ($Device -match 'CC-RT-M-BLE') { if ($Device -match '(?<MACAddress>[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+)') { $MACAddresses += $Matches.MACAddress } } }
-foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
+$MACAddresses = $MACAddresses | Select-Object -Unique
+foreach ($MACAddress in $MACAddresses)
 {
     Write-Host "Checking $MACAddress"
     #$TryAgain = $true
     get-job | Remove-Job -Force
-    Start-Job -Name $MACAddress -ScriptBlock {gatttool -b $args[0] --char-write-req -a 0x0411 -n 03 --listen } -ArgumentList $MACAddress
+    $scriptBlock = [scriptblock]::Create("gatttool -b " + $MACAddress + ' --char-write-req -a "0x0411" -n "03" --listen')
     Write-Host "Waiting for job to finish on $MACAddress"
-    $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
+    $Job = (Start-Job -Name $MACAddress -ScriptBlock $scriptBlock -ArgumentList $MACAddress)
     do
     {
         start-sleep -milliseconds 500
