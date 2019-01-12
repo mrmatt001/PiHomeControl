@@ -51,8 +51,8 @@ There will probably be an updated version for this by the time you read it - rep
 
     sudo reboot
 
-## Launch PSCorePiHomeControl Script    
-To run the PSCorePiHomeControl script run:
-
-    sudo git clone https://github.com/mrmatt001/PSCorePiHomeControl /home/pi/PSCorePiHomeControl    #if not done already as part of DB install
-    /home/pi/PSCorePiHomeControl/HomeControl.ps1
+## Launch EQ3PiPowerShell Script    
+To run the EQ3PiPowerShell script run:
+    mkdir /home/pi/EQ3PiPowerShell
+    sudo git clone https://github.com/mrmatt001/PSCorePiHomeControl /home/pi/EQ3PiPowerShell   
+    /home/pi/EQ3PiPowerShell/HomeControl.ps1
