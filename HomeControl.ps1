@@ -29,11 +29,9 @@ foreach ($MACAddress in $MACAddresses)
     Write-Host "Job has returned on $MACAddress"
     foreach ($Line in $TempOutput)
     {
-        $line
         if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
         { 
-            Write-Host ("Temperature: " + [Convert]::ToInt64(($Matches.Temp),16)/2 + "C")
-            #$TryAgain = $false
+            Write-Host ("Temperature: " + [Convert]::ToInt64(($Matches.Temp),16)/2 + "C") -ForegroundColor Green
         }
     }
     <#if ($TryAgain)
