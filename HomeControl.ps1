@@ -12,8 +12,7 @@ foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
     Write-Host "Checking $MACAddress"
     $TryAgain = $true
     get-job | Remove-Job -Force
-    $ScriptBlock = {gatttool -b $($MACAddress) --char-write-req  -a "0x0411" -n "03" --listen}
-    $JobList = @()
+    Start-Job -ScriptBlock {gatttool -b $args[0] --char-write-req -a 0x0411 -n 03 --listen } -ArgumentList $MACAddress
     Write-Host "Waiting for job to finish on $MACAddress"
     $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
     do
