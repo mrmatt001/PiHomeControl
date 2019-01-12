@@ -9,3 +9,4 @@ $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
 
 $ScriptBlock = {param($1) gatttool -b $1 --char-write-req -a 0x0411 -n 03 --listen}
 
+Start-Job -ScriptBlock {gatttool -b $args[0] --char-write-req -a 0x0411 -n 03 --listen } -ArgumentList $MACAddress
