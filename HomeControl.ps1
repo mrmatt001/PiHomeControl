@@ -9,9 +9,10 @@ $MACAddresses = @()
 foreach ($Device in ("devices" | bluetoothctl)) { if ($Device -match 'CC-RT-M-BLE') { if ($Device -match '(?<MACAddress>[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+)') { $MACAddresses += $Matches.MACAddress } } }
 foreach ($MACAddress in ($MACAddresses | Select-Object -Unique))
 {
+    Write-Host "Checking $MACAddress"
     $TryAgain = $true
     get-job | Remove-Job -Force
-    $ScriptBlock = (gatttool -b $MACAddress --char-write-req  -a "0x0411" -n "03" --listen)
+    $ScriptBlock = {gatttool -b $($MACAddress) --char-write-req  -a "0x0411" -n "03" --listen}
     $JobList = @()
     $Job = (Start-Job -ScriptBlock $ScriptBlock -Name $MACAddress)
     do
