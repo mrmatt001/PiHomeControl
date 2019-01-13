@@ -69,17 +69,17 @@ function Get-AllowedEQ3Commands
     
     if ($receivedText -match '^Set-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)\s-Temperature\s(?<Temperature>[0-3][0-9].[05]+)')
     {
-        return Set-EQ3Temperature -MACAddress $Matches.MACAddress -Temperature $Matches.Temperature
+        return "Valid"
     }
     
     if ($receivedText -match '^Get-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)')
     {
-        return Get-EQ3Temperature -MACAddress $Matches.MACAddress
+        return "Valid"
     }
     
     if ($receivedText -match '^Get-EQ3Thermostats')
     {
-        return Get-EQ3Thermostats
+        return "Valid"
     }
 }
 

@@ -15,18 +15,28 @@ function Listen-Tcp()
     param(
         [Int32] $port
     )
-    $EndLoop = $false
     $server = New-Object -TypeName System.Net.Sockets.TcpListener -ArgumentList @([System.Net.IPAddress]::Any, $port)
     $server.Start()
     $clientSocket = $server.AcceptSocket()
     $buffer = New-Object -TypeName byte[] -ArgumentList 100
     $clientSocket.Receive($buffer) | Out-Null 
     $receivedText = [System.Text.Encoding]::ASCII.GetString($buffer)
-    if ($receivedText -eq 'quit') {  return "quit" }
-    Write-Host "Received command: $ReceivedText"
-    $ReturnCommand = $false
-    $ReturnCommand = Get-AllowedEQ3Commands
-    if ($ReturnCommand -ne $False)  { $ReturnCommand }
+    if ($receivedText -eq 'quit') 
+    { 
+        return "quit" 
+    }
+    else 
+    {
+        $ReturnCommand = Get-AllowedEQ3Commands
+        if ($ReturnCommand -eq 'valid')  
+        { 
+            Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
+        }
+        else 
+        {
+            Write-Host "Invalid command received" -ForegroundColor Red    
+        }
+    }
     $clientSocket.Close()
     $server.Stop()
 }
