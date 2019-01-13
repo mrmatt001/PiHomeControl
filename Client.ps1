@@ -10,6 +10,7 @@ systemctl start bluetooth
 
 #foreach ($MACAddress in (Get-EQ3Thermostats)) { Set-EQ3Temperature -MACAddress $MACAddress -Temperature 22 }
 
+
 function Listen-Tcp()
 {
     param(
@@ -33,7 +34,8 @@ function Listen-Tcp()
         if ($ReturnedValue -eq 'Valid')  
         {
             Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
-            Invoke-Command -ScriptBlock $receivedText
+            $scriptBlock = [scriptblock]::Create($receivedText)
+            Invoke-Command -ScriptBlock $scriptBlock
         }
         else
         { 
