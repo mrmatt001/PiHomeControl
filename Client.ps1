@@ -50,6 +50,8 @@ function Listen-Tcp()
         }
         else
         { 
+            $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes("!")
+            $clientSocket.Send($returnbuffer) | Out-Null
             Write-Host "Invalid command received" -ForegroundColor Red    
         }
         
