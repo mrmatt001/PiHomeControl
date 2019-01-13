@@ -70,7 +70,7 @@ function Get-AllowedEQ3Commands
         [STRING]$ReceivedText
     )
     
-    if ($receivedText -match '^Set-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)\s-Temperature\s(?<Temperature>[0-3][0-9].[05]+)')
+    if ($receivedText -match '^Set-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)\s-Temperature\s(?<Temperature>[0-3][0-9])')
     {
         return "Valid"
     }
