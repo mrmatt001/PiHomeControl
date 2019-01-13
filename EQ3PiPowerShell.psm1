@@ -56,9 +56,10 @@ function Set-EQ3Temperature
     {
         modprobe btusb
         systemctl start bluetooth
-        if ($Temperature -match '^(?<TEMPHex>[0-3][0-9]).[5]') { $Temperature = (([INT32]$Matches.TEMPHex * 2) + 1) }
-        if ($Temperature -match '^(?<TEMPHex>[0-3][0-9]).[0]') { $Temperature = (([INT32]$Matches.TEMPHex * 2)) }
-        $TemperatureHex = '{0:x}' -f $Temperature
+        $Temp2 = $Temperature
+        if ($Temperature -match '^(?<TEMPHex>[0-3][0-9]).[5]') { $Temp2 = (([INT32]$Matches.TEMPHex * 2) + 1) }
+        if ($Temperature -match '^(?<TEMPHex>[0-3][0-9]).[0]') { $Temp2 = (([INT32]$Matches.TEMPHex * 2)) }
+        $TemperatureHex = '{0:x}' -f $Temp2
         $SetTemp = (gatttool -b $MACAddress --char-write-req -a "0x0411" -n "41$TemperatureHex")
     }     
 }
