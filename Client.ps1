@@ -42,6 +42,9 @@ function Listen-Tcp()
                 $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes($Line)
                 $clientSocket.Send($returnbuffer) | Out-Null
             }
+            
+            $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes("END OF TEXT")
+            $clientSocket.Send($returnbuffer) | Out-Null
         }
         else
         { 
