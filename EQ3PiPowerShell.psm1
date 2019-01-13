@@ -50,8 +50,8 @@ function Set-EQ3Temperature
 {
     param (
         $MACAddress,
-        $Temperature,
-        [Int32]$TimeOut = 30)
+        $Temperature
+        )
     process
     {
         modprobe btusb
