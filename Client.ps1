@@ -26,6 +26,8 @@ function Listen-Tcp()
     { 
         $clientSocket.Close()
         $server.Stop()
+        $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes("!")
+        $clientSocket.Send($returnbuffer) | Out-Null
         return "quit" 
     }
     else 
