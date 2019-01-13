@@ -1,8 +1,8 @@
 function Get-EQ3Temperature
 {
     param (
-    $MACAddress,
-    [Int32]$TimeOut = 30)
+    $MACAddress
+    )
     process
     {
         modprobe btusb
@@ -16,7 +16,7 @@ function Get-EQ3Temperature
             start-sleep -milliseconds 500
             $JobOutput = Get-Job -id $Job.Id -ErrorAction SilentlyContinue | Receive-Job -Keep
         }
-        until (($JobOutput -match 'Characteristic') -or (((Get-Date).AddSeconds(-$TimeOut) -gt $JobStartTime)))
+        until (($JobOutput -match 'Characteristic') -or (((Get-Date).AddSeconds(-30) -gt $JobStartTime)))
         
         if ($JobOutput -match 'Characteristic')
         {
