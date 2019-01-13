@@ -1,7 +1,7 @@
 #git init
 #git remote add PiHomeControl https://github.com/mrmatt001/PiHomeControl.git
 #git push --set-upstream PiHomeControl master
-Import-Module .\EQ3PiPowerShell.psm1
+Import-Module /home/pi/PiHomeControl/EQ3PiPowerShell.psm1
 
 modprobe btusb
 systemctl start bluetooth
