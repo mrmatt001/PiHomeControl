@@ -23,6 +23,8 @@ function Listen-Tcp()
     $receivedText = [System.Text.Encoding]::ASCII.GetString($buffer)
     if ($receivedText -eq 'quit') 
     { 
+        $clientSocket.Close()
+        $server.Stop()
         return "quit" 
     }
     else 
@@ -36,9 +38,9 @@ function Listen-Tcp()
         {
             Write-Host "Invalid command received" -ForegroundColor Red    
         }
+        $clientSocket.Close()
+        $server.Stop()
     }
-    $clientSocket.Close()
-    $server.Stop()
 }
 
 $Port = 3339
