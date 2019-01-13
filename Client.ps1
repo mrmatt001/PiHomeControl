@@ -28,7 +28,7 @@ function Listen-Tcp()
     else 
     {
         $ReturnCommand = Get-AllowedEQ3Commands -ReceivedText $receivedText
-        if ($ReturnCommand -eq 'valid')  
+        if ($ReturnCommand -eq 'Valid')  
         { 
             Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
         }
