@@ -35,7 +35,19 @@
 #
 $Port = "3339"
 $Hostname = "192.168.50.76"
+$Temperature = "20"
 #Connect-Tcp -hostname $Hostname -port $Port -Message "Set-EQ3Temperature -MACAddress 00:1A:22:10:D0:C3 -Temperature 18"
-Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Temperature -MACAddress 00:1A:22:10:D0:C3"
-#Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Thermostats"
+#Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Temperature -MACAddress 00:1A:22:10:D0:C3"
+$MACAddresses = @((Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Thermostats"))
+Start-Sleep -seconds 2
+foreach ($MACAddress in $MACAddresses)
+{    
+    Write-Host "Setting temperature on: $MACAddress"
+    $MACAddress = $MACAddress.Trim()
+    (Connect-Tcp -hostname $Hostname -port $Port -Message "Set-EQ3Temperature -MACAddress $MACAddress -Temperature $Temperature")
+}
+foreach ($MACAddress in (Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Thermostats"))
+{
+    Write-Host ("Temperature on $MACAddress " + (Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Temperature -MACAddress $MACAddress"))
+}
 #Connect-Tcp -hostname 192.168.50.76 -port 3339 -Message "quit"
