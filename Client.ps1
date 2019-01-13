@@ -30,14 +30,14 @@ function Listen-Tcp()
     else 
     {
         $ReturnedValue = Get-AllowedEQ3Commands -ReceivedText $receivedText
-        if ($ReturnedValue -eq 'Invalid')  
+        if ($ReturnedValue -eq 'Valid')  
         {
-            Write-Host "Invalid command received" -ForegroundColor Red    
+            Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
+            Invoke-Command -ScriptBlock $receivedText
         }
         else
         { 
-            Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
-            $ReturnedValue
+            Write-Host "Invalid command received" -ForegroundColor Red    
         }
         
         $clientSocket.Close()
