@@ -71,15 +71,14 @@ function Get-AllowedEQ3Commands
     {
         return "Valid"
     }
-    
-    if ($receivedText -match '^Get-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)')
+    elseif ($receivedText -match '^Get-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)')
     {
         return "Valid"
     }
-    
-    if ($receivedText -match '^Get-EQ3Thermostats')
+    elseif ($receivedText -match '^Get-EQ3Thermostats')
     {
-        return "Valid"
+        return Get-EQ3Thermostats
     }
+    else { return "Invalid" }
 }
 

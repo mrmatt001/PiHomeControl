@@ -29,15 +29,17 @@ function Listen-Tcp()
     }
     else 
     {
-        $ReturnCommand = Get-AllowedEQ3Commands -ReceivedText $receivedText
-        if ($ReturnCommand -eq 'Valid')  
-        { 
-            Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
-        }
-        else 
+        $ReturnedValue = Get-AllowedEQ3Commands -ReceivedText $receivedText
+        if ($ReturnedValue -eq 'Invalid')  
         {
             Write-Host "Invalid command received" -ForegroundColor Red    
         }
+        else
+        { 
+            Write-Host "Received valid command: $ReceivedText" -ForegroundColor Green
+            $ReturnedValue
+        }
+        
         $clientSocket.Close()
         $server.Stop()
     }
