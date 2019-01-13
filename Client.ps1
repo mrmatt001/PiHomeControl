@@ -50,4 +50,8 @@ function Listen-Tcp()
 $Port = 3339
 Clear-Host
 Write-Host "Listening on port: $Port"
-do { $ListenTCP = (Listen-Tcp -port $Port) } until ($ListenTCP -eq 'quit')
+do 
+{ 
+    $ListenTCP = (Listen-Tcp -port $Port) 
+    $ListenTCP
+} until ($ListenTCP -eq 'quit')
