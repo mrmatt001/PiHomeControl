@@ -38,6 +38,7 @@ function Listen-Tcp()
             
             foreach ($Line in (Invoke-Command -ScriptBlock $scriptBlock))
             {
+                $Line
                 $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes($Line)
                 $clientSocket.Send($returnbuffer) | Out-Null
             }
