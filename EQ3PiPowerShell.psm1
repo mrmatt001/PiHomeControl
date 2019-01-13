@@ -60,3 +60,26 @@ function Set-EQ3Temperature
         $SetTemp = (gatttool -b $MACAddress --char-write-req -a "0x0411" -n "41$TemperatureHex")
     }     
 }
+
+function Get-AllowedEQ3Commands
+{
+    param(
+        [STRING]$ReceivedText
+    )
+    
+    if ($receivedText -match '^Set-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)\s-Temperature\s(?<Temperature>[0-3][0-9].[05]+)')
+    {
+        return Set-EQ3Temperature -MACAddress $Matches.MACAddress -Temperature $Matches.Temperature
+    }
+    
+    if ($receivedText -match '^Get-EQ3Temperature\s-MACAddress\s(?<MACAddress>[a-fA-F0-9:]+)')
+    {
+        return Get-EQ3Temperature -MACAddress $Matches.MACAddress
+    }
+    
+    if ($receivedText -match '^Get-EQ3Thermostats')
+    {
+        return Get-EQ3Thermostats
+    }
+}
+
