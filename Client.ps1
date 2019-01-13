@@ -24,10 +24,10 @@ function Listen-Tcp()
     $receivedText = [System.Text.Encoding]::ASCII.GetString($buffer)
     if ($receivedText -eq 'quit') 
     { 
-        $clientSocket.Close()
-        $server.Stop()
         $returnbuffer = [System.Text.Encoding]::ASCII.GetBytes("!")
         $clientSocket.Send($returnbuffer) | Out-Null
+        $clientSocket.Close()
+        $server.Stop()
         return "quit" 
     }
     else 
