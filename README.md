@@ -54,12 +54,12 @@ There will probably be an updated version for this by the time you read it - rep
 ## Setup the database on the Primary Pi
 To install the Postgres server run:
 
-    Install-Module EQ3PiPowerShell
+    mkdir /home/pi/PiHomeControl
+    git clone https://github.com/mrmatt001/PiHomeControl /home/pi/PiHomeControl   
+    Import-Module /home/pi/PiHomeControl
     Install-Postgres
 
 ## Launch EQ3PiPowerShell Script    
 To run the EQ3PiPowerShell script run:
 
-    mkdir /home/pi/EQ3PiPowerShell
-    sudo git clone https://github.com/mrmatt001/PiHomeControl /home/pi/PiHomeControl   
     /home/pi/PiHomeControl/HomeControl.ps1

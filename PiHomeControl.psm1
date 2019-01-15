@@ -95,7 +95,7 @@ function Install-Postgres
     (Get-Content /etc/postgresql/9.6/main/postgresql.conf).replace("ssl = true","ssl = false") | Set-Content /etc/postgresql/9.6/main/postgresql.conf
     sudo service postgresql restart
     Register-PackageSource -Name "nugetv2" -ProviderName NuGet -Location "http://www.nuget.org/api/v2/"
-    Install-Package NpgSQL -Force
+    Install-Package NpgSQL -Force| Out-Null
 }
 
 function Install-HomeControlDB
@@ -166,4 +166,18 @@ function Write-ToPostgreSQL([STRING]$Statement,[STRING]$DBServer,[STRING]$DBName
     }
     $Connection.Close()
     Return $Success
+}
+
+function Register-PiDeviceToPostgres
+{
+    Param(
+        [Parameter(Mandatory=$true)][STRING]$DBServer,
+        [Parameter(Mandatory=$true)][STRING]$DBUser,
+        [Parameter(Mandatory=$true)][SecureString]$DBPassword
+        )
+    $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
+    $Hostname = hostname
+    $Statement =  "INSERT INTO pidevices(pihostname) VALUES ('$Hostname');"
+    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName homecontrol -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
+    Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
 }
