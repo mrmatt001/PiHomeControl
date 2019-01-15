@@ -177,7 +177,7 @@ function Register-PiDeviceToPostgres
         )
     $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     $Hostname = hostname
-    $Statement =  "INSERT INTO pidevices(pihostname) VALUES ('$Hostname');"
+    $Statement =  "INSERT INTO pidevices(pihostname,ostype) VALUES ('$Hostname','raspbian');"
     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName homecontrol -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
 }
