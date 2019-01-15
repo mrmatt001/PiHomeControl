@@ -17,10 +17,10 @@ Raspbian Stretch Lite (2018-11-13)
     sudo apt-get install git -y
     sudo apt-get update -y
     sudo apt-get upgrade -y
-    sudo Raspi-config
+    sudo raspi-config
     
 ##### Set new Password for Pi (option one)
-##### Set hostname to PiBrewery (option two | N1)
+##### Set hostname to PiHomeControl[X](option two | N1) 
 ##### Set to autologon console (option three |B1 | B2)
 ##### Set wifi country to location (option four | I4)
 ##### Enable ssh (option five | P2)
@@ -55,5 +55,5 @@ There will probably be an updated version for this by the time you read it - rep
 To run the EQ3PiPowerShell script run:
 
     mkdir /home/pi/EQ3PiPowerShell
-    sudo git clone https://github.com/mrmatt001/PSCorePiHomeControl /home/pi/EQ3PiPowerShell   
-    /home/pi/EQ3PiPowerShell/HomeControl.ps1
+    sudo git clone https://github.com/mrmatt001/PiHomeControl /home/pi/PiHomeControl   
+    /home/pi/PiHomeControl/HomeControl.ps1
