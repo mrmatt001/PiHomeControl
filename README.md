@@ -51,6 +51,12 @@ There will probably be an updated version for this by the time you read it - rep
 
     sudo reboot
 
+## Setup the database on the Primary Pi
+To install the Postgres server run:
+
+    Install-Module EQ3PiPowerShell
+    Install-Postgres
+
 ## Launch EQ3PiPowerShell Script    
 To run the EQ3PiPowerShell script run:
 

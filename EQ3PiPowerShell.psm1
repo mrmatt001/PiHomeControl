@@ -110,7 +110,7 @@ function Install-Postgres
     (Get-Content /etc/postgresql/9.6/main/postgresql.conf).replace("ssl = true","ssl = false") | Set-Content /etc/postgresql/9.6/main/postgresql.conf
     sudo service postgresql restart
     Register-PackageSource -Name "nugetv2" -ProviderName NuGet -Location "http://www.nuget.org/api/v2/"
-    Install-Package NpgSQL | Out-Null
+    Install-Package NpgSQL -Force
 }
 
 function Remove-Postgres
@@ -120,4 +120,46 @@ function Remove-Postgres
     sudo -u postgres psql -c 'DROP TABLE brews;'
     sudo -u postgres psql -c 'DROP ROLE dbuser;'
     sudo -u postgres psql -c 'DROP DATABASE brewery;'
+}
+
+function Read-FromPostgreSQL([STRING]$Query,[STRING]$DBServer,[STRING]$DBName,[STRING]$WhereClause,[STRING]$DBPort,[STRING]$DBUser,[STRING]$DBPassword)
+{
+    if ($IsLinux) { import-module /usr/local/share/PackageManagement/NuGet/Packages/Npgsql.4.0.4/lib/net45/Npgsql.dll }
+    if ($IsWindows) { import-module C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\v4.0_4.0.4.0__5d8b90d52f46fda7\Npgsql.dll }
+    $query = $query -f $WhereClause
+    $connection = new-object Npgsql.NpgsqlConnection
+    $connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $DBPassword
+    $DBCommand = $connection.CreateCommand()
+    $DBCommand.CommandText = $query
+    $table = new-object system.data.datatable
+    $Adapter = New-Object Npgsql.NpgsqlDataAdapter ($DBCommand)
+    try
+    {
+        $Adapter.Fill($table) | Out-Null
+    }
+    catch {}
+    $connection.Close() 
+    Return $Table   
+}
+
+function Write-ToPostgreSQL([STRING]$Statement,[STRING]$DBServer,[STRING]$DBName,[STRING]$WhereClause,[STRING]$DBPort,[STRING]$DBUser,[STRING]$DBPassword)
+{
+    if ($IsLinux) { import-module /usr/local/share/PackageManagement/NuGet/Packages/Npgsql.4.0.4/lib/net45/Npgsql.dll }
+    if ($IsWindows) { import-module C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\v4.0_4.0.4.0__5d8b90d52f46fda7\Npgsql.dll }
+    $Connection = new-object Npgsql.NpgsqlConnection
+    $Connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $DBPassword
+    try
+    {
+        $Connection.open() 
+        $DBCommand = $connection.CreateCommand()
+        $DBCommand.CommandText = $Statement
+        $DBCommand.ExecuteNonQuery() | Out-Null 
+        $Success = $true
+    }
+    catch
+    {
+        $Success = $false
+    }
+    $Connection.Close()
+    Return $Success
 }
