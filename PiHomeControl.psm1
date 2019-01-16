@@ -135,7 +135,7 @@ function Read-FromPostgreSQL
         [Parameter(Mandatory=$true)][STRING]$DBServer,
         [Parameter(Mandatory=$true)][STRING]$DBName,
         [Parameter(Mandatory=$true)][STRING]$DBUser,
-        [Parameter(Mandatory=$true)][SecureString]$DBPassword,
+        [Parameter(Mandatory=$true)][String]$DBPassword,
         [Parameter(Mandatory=$true)][String]$Query,
         [STRING]$WhereClause
         )
