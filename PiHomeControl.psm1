@@ -183,6 +183,7 @@ function Register-PiDevice
     $Statement = "WITH upsert AS ($upsert RETURNING *) $insert WHERE NOT EXISTS (SELECT * FROM upsert)"
     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
+    Get-EQ3Thermostats
 }
 
 function Read-RegisteredPiDevices
