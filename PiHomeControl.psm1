@@ -111,7 +111,7 @@ function Install-HomeControlDB
     sudo -u postgres psql homecontrol -c "create role $DBUser with login password '$UnsecurePassword';"
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
-    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) NOT NULL);'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) NOT NULL,friendlyname VarChar(50));'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL);'
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pidevices TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT ALL ON eq3thermostats TO $DBUser;"
@@ -122,19 +122,29 @@ function Install-HomeControlDB
 function Remove-Postgres
 {
     sudo apt-get remove postgresql libpq-dev postgresql-client postgresql-client-common -y
-    sudo -u postgres psql -c 'DROP TABLE control;'
-    sudo -u postgres psql -c 'DROP TABLE brews;'
+    sudo -u postgres psql homecontrol -c 'DROP TABLE pidevices;'
+    sudo -u postgres psql homecontrol-c 'DROP TABLE eq3thermostats;'
+    sudo -u postgres psql homecontrol-c 'DROP TABLE pitoeq3;'
     sudo -u postgres psql -c 'DROP ROLE dbuser;'
-    sudo -u postgres psql -c 'DROP DATABASE brewery;'
+    sudo -u postgres psql -c 'DROP DATABASE homecontrol;'
 }
 
-function Read-FromPostgreSQL([STRING]$Query,[STRING]$DBServer,[STRING]$DBName,[STRING]$WhereClause,[STRING]$DBPort,[STRING]$DBUser,[STRING]$DBPassword)
+function Read-FromPostgreSQL
 {
+    Param(
+        [Parameter(Mandatory=$true)][STRING]$DBServer,
+        [Parameter(Mandatory=$true)][STRING]$DBName,
+        [Parameter(Mandatory=$true)][STRING]$DBUser,
+        [Parameter(Mandatory=$true)][SecureString]$DBPassword,
+        [Parameter(Mandatory=$true)][SecureString]$Query,
+        [STRING]$WhereClause
+        )
+    $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     if ($IsLinux) { import-module /usr/local/share/PackageManagement/NuGet/Packages/Npgsql.4.0.4/lib/net45/Npgsql.dll }
     if ($IsWindows) { import-module C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\v4.0_4.0.4.0__5d8b90d52f46fda7\Npgsql.dll }
     $query = $query -f $WhereClause
     $connection = new-object Npgsql.NpgsqlConnection
-    $connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $DBPassword
+    $connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $UnsecurePassword
     $DBCommand = $connection.CreateCommand()
     $DBCommand.CommandText = $query
     $table = new-object system.data.datatable
@@ -185,7 +195,10 @@ function Register-PiDevice
     $Statement = "WITH upsert AS ($upsert RETURNING *) $insert WHERE NOT EXISTS (SELECT * FROM upsert)"
     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
-    Get-EQ3Thermostats
+    foreach ($MACAddress in Get-EQ3Thermostats)
+    {
+        Read-FromPostgreSQL -Query "Select * from eq3thermostats WHERE eq3macaddress='$MACAddress'"
+    }
 }
 
 function Read-RegisteredPiDevices
