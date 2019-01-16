@@ -41,6 +41,8 @@ function Get-EQ3Thermostats
 {
     modprobe btusb
     systemctl start bluetooth
+    "scan on" | bluetoothctl
+    Start-Sleep -seconds 10
     $MACAddresses = @()
     foreach ($Device in ("devices" | bluetoothctl)) { if ($Device -match 'CC-RT-M-BLE') { if ($Device -match '(?<MACAddress>[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+\:[0-9A-Z]+)') { $MACAddresses += $Matches.MACAddress } } }
     return ($MACAddresses | Sort-Object -Unique)
