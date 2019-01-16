@@ -168,16 +168,32 @@ function Write-ToPostgreSQL([STRING]$Statement,[STRING]$DBServer,[STRING]$DBName
     Return $Success
 }
 
-function Register-PiDeviceToPostgres
+function Register-PiDevice
 {
     Param(
         [Parameter(Mandatory=$true)][STRING]$DBServer,
+        [Parameter(Mandatory=$true)][STRING]$DBName,
         [Parameter(Mandatory=$true)][STRING]$DBUser,
         [Parameter(Mandatory=$true)][SecureString]$DBPassword
         )
     $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
-    $Hostname = hostname
-    $Statement =  "INSERT INTO pidevices(pihostname,ostype) VALUES ('$Hostname','raspbian');"
-    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName homecontrol -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
+    $hostname = (hostname)
+    $insert = "INSERT INTO pidevices (pihostname, ostype) SELECT '$hostname', 'linux'";
+    $upsert = "UPDATE pidevices SET ostype='linux' WHERE pihostname='$hostname'";
+    $Statement = "WITH upsert AS ($upsert RETURNING *) $insert WHERE NOT EXISTS (SELECT * FROM upsert)"
+    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
+}
+
+function Read-RegisteredPiDevices
+{
+    Param(
+        [Parameter(Mandatory=$true)][STRING]$DBServer,
+        [Parameter(Mandatory=$true)][STRING]$DBName,
+        [Parameter(Mandatory=$true)][STRING]$DBUser,
+        [Parameter(Mandatory=$true)][SecureString]$DBPassword
+        )
+    $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
+    Read-FromPostgreSQL -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword -Query 'select pihostname from pidevices'
+    
 }
