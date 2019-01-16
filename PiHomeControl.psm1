@@ -136,7 +136,7 @@ function Read-FromPostgreSQL
         [Parameter(Mandatory=$true)][STRING]$DBName,
         [Parameter(Mandatory=$true)][STRING]$DBUser,
         [Parameter(Mandatory=$true)][SecureString]$DBPassword,
-        [Parameter(Mandatory=$true)][SecureString]$Query,
+        [Parameter(Mandatory=$true)][String]$Query,
         [STRING]$WhereClause
         )
     $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
