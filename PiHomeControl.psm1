@@ -186,18 +186,21 @@ function Register-PiDevice
         [Parameter(Mandatory=$true)][STRING]$DBServer,
         [Parameter(Mandatory=$true)][STRING]$DBName,
         [Parameter(Mandatory=$true)][STRING]$DBUser,
-        [Parameter(Mandatory=$true)][SecureString]$DBPassword
+        [Parameter(Mandatory=$true)][String]$DBPassword
         )
-    $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     $hostname = (hostname)
     $insert = "INSERT INTO pidevices (pihostname, ostype) SELECT '$hostname', 'linux'";
     $upsert = "UPDATE pidevices SET ostype='linux' WHERE pihostname='$hostname'";
     $Statement = "WITH upsert AS ($upsert RETURNING *) $insert WHERE NOT EXISTS (SELECT * FROM upsert)"
-    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword
-    Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
+    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
     foreach ($MACAddress in Get-EQ3Thermostats)
     {
-        Read-FromPostgreSQL -Query "Select * from eq3thermostats WHERE eq3macaddress='$MACAddress'"
+        if (!(Read-FromPostgreSQL -Query "Select * from eq3thermostats" -DBServer localhost -DBName localhost -dbuser dbuser -DBPassword Password123)) 
+        { 
+            $ThermostatFriendlyName = Read-Host "Enter a friendly name for the thermostat"
+            $Statement = "INSERT INTO eq3thermostats (eq3macaddress,friendlyname) VALUES ('$MACAddress','$ThermostatFriendlyName')";
+            Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+        }
     }
 }
 
