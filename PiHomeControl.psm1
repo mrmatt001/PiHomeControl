@@ -139,12 +139,12 @@ function Read-FromPostgreSQL
         [Parameter(Mandatory=$true)][String]$Query,
         [STRING]$WhereClause
         )
-    $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
+    #$UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     if ($IsLinux) { import-module /usr/local/share/PackageManagement/NuGet/Packages/Npgsql.4.0.4/lib/net45/Npgsql.dll }
     if ($IsWindows) { import-module C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\v4.0_4.0.4.0__5d8b90d52f46fda7\Npgsql.dll }
     $query = $query -f $WhereClause
     $connection = new-object Npgsql.NpgsqlConnection
-    $connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $UnsecurePassword
+    $connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $DBPassword
     $DBCommand = $connection.CreateCommand()
     $DBCommand.CommandText = $query
     $table = new-object system.data.datatable
