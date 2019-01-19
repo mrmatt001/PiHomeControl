@@ -197,6 +197,7 @@ function Register-PiDevice
     {
         if (!(Read-FromPostgreSQL -Query "Select * from eq3thermostats" -DBServer localhost -DBName localhost -dbuser dbuser -DBPassword Password123)) 
         { 
+            Write-Host ("$MACAddress currently set at " + (Get-EQ3Temperature -MACAddress $MACAddress)) 
             $ThermostatFriendlyName = Read-Host "Enter a friendly name for the thermostat"
             $Statement = "INSERT INTO eq3thermostats (eq3macaddress,friendlyname) VALUES ('$MACAddress','$ThermostatFriendlyName')";
             Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
@@ -215,4 +216,41 @@ function Read-RegisteredPiDevices
     $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     Read-FromPostgreSQL -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword -Query 'select pihostname from pidevices'
     
+}
+
+function Install-AccessPoint([STRING]$SSID,[STRING]$SSIDPassword)
+{
+    sudo apt-get update -y
+    sudo apt-get upgrade -y
+    sudo apt-get install dnsmasq hostapd samba winbind -y
+    sudo systemctl stop dnsmasq
+    sudo systemctl stop hostapd
+    Add-Content -Path /etc/dhcpcd.conf -Value "interface wlan0"
+    Add-Content -Path /etc/dhcpcd.conf -Value "    static ip_address=192.168.150.1/24"
+    sudo service dhcpcd restart
+    Rename-Item -Path /etc/dnsmasq.conf -NewName dnsmasq.conf.orig
+    Add-Content -Path /etc/dnsmasq.conf -Value "interface=wlan0      # Use the require wireless interface - usually wlan0"
+    Add-Content -Path /etc/dnsmasq.conf -Value "  dhcp-range=192.168.150.100,192.168.150.120,255.255.255.0,24h"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "interface=wlan0"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "driver=nl80211"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "ssid=$SSID"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "hw_mode=g"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "channel=7"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "wmm_enabled=0"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "macaddr_acl=0"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "auth_algs=1"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "ignore_broadcast_ssid=0"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "wpa=2"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "wpa_passphrase=$SSIDPassword"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "wpa_key_mgmt=WPA-PSK"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "wpa_pairwise=TKIP"
+    Add-Content -Path /etc/hostapd/hostapd.conf -Value "rsn_pairwise=CCMP"
+    (Get-Content /etc/default/hostapd).replace('#DAEMON_CONF=""','DAEMON_CONF="/etc/hostapd/hostapd.conf"') | Set-Content /etc/default/hostapd
+    sudo service hostapd start  
+    sudo service dnsmasq start  
+    (Get-Content /etc/sysctl.conf).replace('#net.ipv4.ip_forward=1','net.ipv4.ip_forward=1') | Set-Content /etc/sysctl.conf
+    sudo iptables -t nat -A  POSTROUTING -o eth0 -j MASQUERADE
+    sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
+    (Get-Content /etc/rc.local).replace('exit 0','iptables-restore < /etc/iptables.ipv4.nat') | Set-Content /etc/rc.local
+    Add-Content -Path /etc/rc.local -Value "exit 0"
 }

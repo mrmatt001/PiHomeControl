@@ -13,7 +13,7 @@ Raspbian Stretch Lite (2018-11-13)
 # Build Steps
 
 ## Manual Commands (with keyboard / monitor / network)
-    sudo rpi-update           #Need the latest firmware to support more than 1 temperature sensor
+    sudo rpi-update          
     sudo apt-get install git -y
     sudo apt-get update -y
     sudo apt-get upgrade -y
@@ -23,6 +23,7 @@ Raspbian Stretch Lite (2018-11-13)
 ##### Set hostname to PiHomeControl[X](option two | N1) 
 ##### Set to autologon console (option three |B1 | B2)
 ##### Set wifi country to location (option four | I4)
+##### Enable ssh (option five | P2)
 ##### Enable ssh (option five | P2)
 
     sudo reboot
