@@ -34,7 +34,7 @@
 
 #
 $Port = "3339"
-$Hostname = "192.168.50.76"
+$Hostname = "192.168.50.81"
 $Temperature = "19"
 #Connect-Tcp -hostname $Hostname -port $Port -Message "Set-EQ3Temperature -MACAddress 00:1A:22:10:D0:C3 -Temperature 18"
 #Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Temperature -MACAddress 00:1A:22:10:D0:C3"

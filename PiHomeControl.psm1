@@ -111,7 +111,7 @@ function Install-HomeControlDB
     sudo -u postgres psql homecontrol -c "create role $DBUser with login password '$UnsecurePassword';"
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
-    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) NOT NULL,friendlyname VarChar(50));'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) UNIQUE NOT NULL,friendlyname VarChar(50)),currenttemperature INT;'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL);'
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pidevices TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT ALL ON eq3thermostats TO $DBUser;"
@@ -123,8 +123,8 @@ function Remove-Postgres
 {
     sudo apt-get remove postgresql libpq-dev postgresql-client postgresql-client-common -y
     sudo -u postgres psql homecontrol -c 'DROP TABLE pidevices;'
-    sudo -u postgres psql homecontrol-c 'DROP TABLE eq3thermostats;'
-    sudo -u postgres psql homecontrol-c 'DROP TABLE pitoeq3;'
+    sudo -u postgres psql homecontrol -c 'DROP TABLE eq3thermostats;'
+    sudo -u postgres psql homecontrol -c 'DROP TABLE pitoeq3;'
     sudo -u postgres psql -c 'DROP ROLE dbuser;'
     sudo -u postgres psql -c 'DROP DATABASE homecontrol;'
 }
@@ -141,7 +141,11 @@ function Read-FromPostgreSQL
         )
     #$UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     if ($IsLinux) { import-module /usr/local/share/PackageManagement/NuGet/Packages/Npgsql.4.0.4/lib/net45/Npgsql.dll }
-    if ($IsWindows) { import-module C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\v4.0_4.0.4.0__5d8b90d52f46fda7\Npgsql.dll }
+    if ($IsWindows) 
+    { 
+        import-module C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\*\Npgsql.dll
+        Add-Type -Path C:\Windows\Microsoft.NET\assembly\GAC_MSIL\Npgsql\*\Npgsql.dll 
+    }
     $query = $query -f $WhereClause
     $connection = new-object Npgsql.NpgsqlConnection
     $connection.ConnectionString = "Server={0};Port={1};Database={2};User Id={3};Password={4}" -f $DBServer, $DBPort, $DBName, $DBUser, $DBPassword
@@ -205,6 +209,20 @@ function Register-PiDevice
     }
 }
 
+function Set-EQ3FriendlyName
+{
+    Param(
+        [Parameter(Mandatory=$true)][STRING]$DBServer,
+        [Parameter(Mandatory=$true)][STRING]$DBName,
+        [Parameter(Mandatory=$true)][STRING]$DBUser,
+        [Parameter(Mandatory=$true)][String]$DBPassword,
+        [Parameter(Mandatory=$true)][STRING]$EQ3MACAddress,
+        [Parameter(Mandatory=$true)][STRING]$FriendlyName
+        )
+    $Statement = "UPDATE eq3thermostats SET friendlyname='$FriendlyName' WHERE eq3macaddress='$EQ3MACAddress'"
+    Write-ToPostgreSQL -DBServer $DBServer -DBName $DBName -DBUser $DBUser -DBPassword $DBPassword -Statement $Statement
+}
+
 function Read-RegisteredPiDevices
 {
     Param(
@@ -215,7 +233,6 @@ function Read-RegisteredPiDevices
         )
     $UnsecurePassword = (New-Object PSCredential "user",$DBPassword).GetNetworkCredential().Password
     Read-FromPostgreSQL -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $UnsecurePassword -Query 'select pihostname from pidevices'
-    
 }
 
 function Install-AccessPoint([STRING]$SSID,[STRING]$SSIDPassword)
