@@ -458,10 +458,12 @@ do
         if (!(Read-FromPostgreSQL -DBServer $DBServer -DBName $DBName -DBUser $DBUser -DBPassword $DBPassword -Query 'select * from pidevices')) 
         { 
             $SystemOnline = $false 
+            Write-Host "System Offline"
         }
         else
         {
             $SystemOnline = $true
+            Write-Host "System Online"
         }    
         $LastOnlineCheckDate = (Get-Date)
     }
