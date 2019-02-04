@@ -5,9 +5,9 @@ function Get-EQ3Temperature
     )
     process
     {
-        modprobe btusb
-        systemctl start bluetooth
-        #get-job | Remove-Job -Force
+        #modprobe btusb
+        #systemctl start bluetooth
+        get-job | Remove-Job -Force
         $scriptBlock = [scriptblock]::Create("gatttool -b " + $MACAddress + ' --char-write-req -a "0x0411" -n "03" --listen')
         $Job = (Start-Job -Name $MACAddress -ScriptBlock $scriptBlock -ArgumentList $MACAddress)
         $JobStartTime = (Get-Date)
