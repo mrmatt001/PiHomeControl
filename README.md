@@ -59,6 +59,11 @@ To install the Postgres server run:
     git clone https://github.com/mrmatt001/PiHomeControl /home/pi/PiHomeControl   
     Import-Module /home/pi/PiHomeControl
     Install-Postgres
+    Install-HomeControlDB -DBUser dbuser -DBPassword Password123
+
+## Register each Raspberry Pi to the Postrgres DB
+
+    Register-PiDevice -DBServer pihomecontrol1 -DBName homecontrol -DBUser dbuser -DBPassword Password123
 
 ## Launch EQ3PiPowerShell Script    
 To run the EQ3PiPowerShell script run:

@@ -111,7 +111,7 @@ function Install-HomeControlDB
     sudo -u postgres psql homecontrol -c "create role $DBUser with login password '$UnsecurePassword';"
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
-    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) UNIQUE NOT NULL,friendlyname VarChar(50)),currenttemperature INT;'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) UNIQUE NOT NULL,friendlyname VarChar(50),currenttemperature INT);'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL);'
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pidevices TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT ALL ON eq3thermostats TO $DBUser;"
@@ -197,6 +197,7 @@ function Register-PiDevice
     $upsert = "UPDATE pidevices SET ostype='linux' WHERE pihostname='$hostname'";
     $Statement = "WITH upsert AS ($upsert RETURNING *) $insert WHERE NOT EXISTS (SELECT * FROM upsert)"
     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+    <#
     foreach ($MACAddress in Get-EQ3Thermostats)
     {
         if (!(Read-FromPostgreSQL -Query "Select * from eq3thermostats" -DBServer localhost -DBName localhost -dbuser dbuser -DBPassword Password123)) 
@@ -207,6 +208,7 @@ function Register-PiDevice
             Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
         }
     }
+    #>
 }
 
 function Set-EQ3FriendlyName
