@@ -78,8 +78,8 @@ do
                 $CompletedJobs = 0
                 foreach ($Job in $RunningJobs)
                 {
-                    $JobOutput = Get-Job -Name $Job -ErrorAction SilentlyContinue | Receive-Job -Keep
-                    if ($JobOutput -match 'Characteristic') { $CompletedJobs++ }
+                    #$JobOutput = Get-Job -Name $Job -ErrorAction SilentlyContinue | Receive-Job -Keep
+                    if ((Get-Job -Name $Job | Receive-Job -Keep) -match 'Characteristic') { $CompletedJobs++ }
                     Write-Host "Completed $CompletedJobs of " ($RunningJobs).Count
                 }
             } until (((((Get-Date).AddSeconds(-30) -gt $JobStartTime))) -or ($CompletedJobs -eq ($RunningJobs).Count))
