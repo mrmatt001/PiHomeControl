@@ -52,18 +52,36 @@ There will probably be an updated version for this by the time you read it - rep
 
     sudo reboot
 
-## Setup the database on the Primary Pi
-To install the Postgres server run:
+## Clone the PiHomeControl 
+To clone run:
 
     mkdir /home/pi/PiHomeControl
     git clone https://github.com/mrmatt001/PiHomeControl /home/pi/PiHomeControl   
     Import-Module /home/pi/PiHomeControl
+    
+## Option 1 : Setup the database on the Primary Pi
+A Postgres database can be installed on the Pi or another server. 
+To install the Postgres server run:
+
     Install-Postgres
-    Install-HomeControlDB -DBUser dbuser -DBPassword Password123
+    Install-HomeControlDB -DBUser dbuser -DBPassword {PASSWORD}
+
+## Option 2 : Setup the database on another server
+Install a Postgres instance. I've followed the guide at https://sondregronas.com/managing-postgresql-on-a-synology-server/ to get it working on my Synology NAS. I then ran the following commands at an SSH window on the Synology box:  
+
+    sudo -u postgres psql -c 'CREATE DATABASE homecontrol;'
+    sudo -u postgres psql homecontrol -c "create role dbuser with login password '{PASSWORD}';"
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) UNIQUE NOT NULL,friendlyname VarChar(50),currenttemperature INT);'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL);'
+    sudo -u postgres psql homecontrol -c "GRANT ALL ON pidevices TO dbuser;"
+    sudo -u postgres psql homecontrol -c "GRANT ALL ON eq3thermostats TO dbuser;"
+    sudo -u postgres psql homecontrol -c "GRANT ALL ON pitoeq3 TO dbuser;"
+    sudo -u postgres psql homecontrol -c "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO dbuser;"
 
 ## Register each Raspberry Pi to the Postrgres DB
 
-    Register-PiDevice -DBServer pihomecontrol1 -DBName homecontrol -DBUser dbuser -DBPassword Password123
+    Register-PiDevice -DBServer {DBServer} -DBName homecontrol -DBUser dbuser -DBPassword {PASSWORD}
 
 ## Launch EQ3PiPowerShell Script    
 To run the EQ3PiPowerShell script run:
