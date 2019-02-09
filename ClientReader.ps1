@@ -57,17 +57,51 @@ do
                 }
             }
             Remove-Item /home/pi/PiHomeControl/BTScan.reading
+            $RunningJobs = @()
+            $JobsStartTime = (Get-Date)
             $BluetoothDevices.Keys | % { 
                 if ($BluetoothDevices.Item($_) -eq 'CC-RT-M-BLE') 
                 { 
                     #key = $_ , value = " + $BluetoothDevices.Item($_) 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
                     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
-                    [string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
-                    $Temp = (($Temperature -as [decimal]) * 2) -as [int32]
-                    $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
-                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                    
+                    get-job -Name $_ | Remove-Job -Force
+                    Write-Host "Triggering job: $_"
+                    $RunningJobs += $_
+                    $scriptBlock = [scriptblock]::Create("gatttool -b " + $MACAddress + ' --char-write-req -a "0x0411" -n "03" --listen')
+                    $Job = (Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $MACAddress)
                 } 
+            }
+
+            do
+            {
+                $CompletedJobs = 0
+                foreach ($Job in $RunningJobs)
+                {
+                    $JobOutput = Get-Job -Name $Job -ErrorAction SilentlyContinue | Receive-Job -Keep
+                    if ($JobOutput -match 'Characteristic') { $CompletedJobs++ }
+                    Write-Host "Completed $CompletedJobs of " $RunningJobs).Count
+                }
+            } until (((((Get-Date).AddSeconds(-30) -gt $JobStartTime))) -or ($CompletedJobs -eq ($RunningJobs).Count))
+
+            foreach ($Job in $RunningJobs)
+            {
+                $TempOutput = Get-Job -Name $Job | Receive-Job
+                $null = Get-Job -Name $Job | Remove-Job -Force
+                foreach ($Line in $TempOutput)
+                {
+                    if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
+                    { 
+                        [string]$Temperature = ([Convert]::ToInt64(($Matches.Temp),16)/2)
+                        #[string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
+                        $Temp = (($Temperature -as [decimal]) * 2) -as [int32]
+                        $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$Job'";
+                        Write-Host $Statement -ForegroundColor Green
+                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                
+                    }
+                }
             }
         }
     }
