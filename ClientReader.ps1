@@ -57,13 +57,13 @@ do
                 }
             }
             Remove-Item /home/pi/PiHomeControl/BTScan.reading
-            #$BluetoothDevices
             $BluetoothDevices.Keys | % { 
                 if ($BluetoothDevices.Item($_) -eq 'CC-RT-M-BLE') 
                 { 
                     #key = $_ , value = " + $BluetoothDevices.Item($_) 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
                     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
+                    Write-Host "MACAddress: " + $_ + " " + (Get-EQ3Temperature -MACAddress $_) + "C"
                 } 
             }
         }
