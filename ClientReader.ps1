@@ -26,9 +26,8 @@ do
         {
             foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.results))
             {
-                $MACAddress = $Line.Split(' ')[0].Trim()
-                $Description = $Line.Split(' ')[1].Trim()
-                $Description
+                $MACAddress = $Line.Split(' ')[0]
+                $Description = $Line.Split(' ')[1]
                 if ($MACAddress -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
                     $Description
