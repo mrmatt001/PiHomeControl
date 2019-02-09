@@ -19,24 +19,26 @@ do
     
     Start-Sleep -Seconds 30
     
-    #if (Test-Path /home/pi/PiHomeControl/BTScan.results) { Remove-Item /home/pi/PiHomeControl/BTScan.results }
+    if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
     if (Test-Path /home/pi/PiHomeControl/BTScan.results) 
     { 
         if ((get-item /home/pi/PiHomeControl/BTScan.results).Length -gt 0) 
         {
-            foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.results))
+            Rename-Item /home/pi/PiHomeControl/BTScan.results /home/pi/PiHomeControl/BTScan.reading
+            foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
             {
                 $MACAddress = $Line.Split(' ')[0]
                 $Description = $Line.Split(' ')[1]
                 if ($MACAddress -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
-                    $Description
                     if ($Description -match 'CC-RT-M-BLE') 
                     { 
-                        Write-Host ("EQ3 " + $Line) -ForegroundColor Red
+                        Write-Host ("EQ3 " + $Line) -ForegroundColor Green
+                        $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
+                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                         if ($BluetoothDevices.Keys -notcontains $MACAddress) 
                         { 
-                            $BluetoothDevices.Add($MACAddress,$Description) 
+                            $BluetoothDevices.Add("$MACAddress","$Description") 
                             Write-Host "Updating PostreSQL with $MACAddress"
                             $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
                             Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
@@ -56,8 +58,8 @@ do
                     }
                 }
             }
+            Remove-Item /home/pi/PiHomeControl/BTScan.reading
             $BluetoothDevices
-            Remove-Item /home/pi/PiHomeControl/BTScan.results
         }
     }
     if (Get-Job -Name BTScan -ErrorAction SilentlyContinue) { Get-Job -Name BTScan | Remove-Job -Force }
