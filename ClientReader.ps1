@@ -28,8 +28,10 @@ do
             Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
             foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
             {
+                $Line
                 if ($Line.Split(' ')[0] -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
+                    Write-Host ("MAC Address " + $Line.Split(' ')[0]) -ForegroundColor Green
                     if ($Line.Split(' ')[1] -match 'CC-RT-M-BLE') 
                     { 
                         if ($BluetoothDevices.Keys -notcontains $Line.Split(' ')[0]) 
