@@ -33,15 +33,13 @@ do
                 {
                     if ($Description -match 'CC-RT-M-BLE') 
                     { 
-                        Write-Host ("EQ3 " + $Line) -ForegroundColor Green
-                        $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
-                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                        #Write-Host ("EQ3 " + $Line) -ForegroundColor Green
+                        #$Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
+                        #Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                         if ($BluetoothDevices.Keys -notcontains $MACAddress) 
                         { 
                             $BluetoothDevices.Add("$MACAddress","$Description") 
-                            Write-Host "Updating PostreSQL with $MACAddress"
-                            $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
-                            Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                            #Write-Host "Updating PostreSQL with $MACAddress"
                         }
                         else 
                         {
@@ -59,7 +57,16 @@ do
                 }
             }
             Remove-Item /home/pi/PiHomeControl/BTScan.reading
-            $BluetoothDevices
+            #$BluetoothDevices
+            $BluetoothDevices.Keys | % 
+            { 
+                if ($BluetoothDevices.Item($_) -eq 'CC-RT-M-BLE') 
+                { 
+                    #key = $_ , value = " + $BluetoothDevices.Item($_) 
+                    $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
+                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                } 
+            }
         }
     }
     if (Get-Job -Name BTScan -ErrorAction SilentlyContinue) { Get-Job -Name BTScan | Remove-Job -Force }
