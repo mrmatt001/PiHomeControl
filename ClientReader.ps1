@@ -17,7 +17,7 @@ do
     $ScriptBlock = { hcitool lescan --duplicates > /home/pi/PiHomeControl/BTScan.results }
     Start-Job -name BTScan -ScriptBlock $ScriptBlock | Out-Null
     
-    Start-Sleep -Seconds 30
+    Start-Sleep -Seconds 15
     
     if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
     if (Test-Path /home/pi/PiHomeControl/BTScan.results) 
