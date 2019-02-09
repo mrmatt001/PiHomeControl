@@ -67,9 +67,9 @@ do
                     
                     get-job -Name $_ | Remove-Job -Force
                     Write-Host "Triggering job: $_"
-                    $RunningJobs += $_
                     $scriptBlock = [scriptblock]::Create("gatttool -b " + $_ + ' --char-write-req -a "0x0411" -n "03" --listen')
-                    Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $_
+                    $Job = (Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $_)
+                    $RunningJobIds += $Job.Name
                 } 
             }
 
@@ -79,6 +79,7 @@ do
                 foreach ($Job in $RunningJobs)
                 {
                     #$JobOutput = Get-Job -Name $Job -ErrorAction SilentlyContinue | Receive-Job -Keep
+                    Get-Job -Name $Job | Receive-Job -Keep
                     if ((Get-Job -Name $Job | Receive-Job -Keep) -match 'Characteristic') { $CompletedJobs++ }
                     Write-Host "Completed $CompletedJobs of " ($RunningJobs).Count
                 }
