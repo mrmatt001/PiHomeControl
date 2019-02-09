@@ -15,7 +15,8 @@ $BluetoothDevices = @{}
 
 do
 {
-    Start-Sleep -Seconds 10
+    if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
+    Start-Sleep -Seconds 20
     Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
     foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
     {
@@ -46,8 +47,7 @@ do
             }
         }
     }
-
-
+    Remove-Item /home/pi/PiHomeControl/BTScan.reading
 } until ($Something)
 
 <#foreach ($MACAddress in (Get-EQ3Thermostats)) 
