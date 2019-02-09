@@ -111,9 +111,11 @@ function Install-HomeControlDB
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3id SERIAL PRIMARY KEY,eq3macaddress VarChar(17) UNIQUE NOT NULL,friendlyname VarChar(50),currenttemperature INT);'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL);'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS bluetoothdevices(btmacaddress VarChar(17) PRIMARY KEY,friendlyname VarChar(30));'
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pidevices TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT ALL ON eq3thermostats TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pitoeq3 TO $DBUser;"
+    sudo -u postgres psql homecontrol -c "GRANT ALL ON bluetoothdevices TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO $DBUser;"
 }
 
