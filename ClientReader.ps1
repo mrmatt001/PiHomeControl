@@ -9,15 +9,15 @@ Import-Module /home/pi/PiHomeControl/PiHomeControl.psm1 -Force
 modprobe btusb
 systemctl stop bluetooth
 systemctl start bluetooth
-Get-Job -Name BTScan | Remove-Job -Force
-$ScriptBlock = { hcitool lescan --duplicates > /home/pi/PiHomeControl/BTScan.results }
-Start-Job -name BTScan -ScriptBlock $ScriptBlock
 $BluetoothDevices = @{}
 
+Get-Job -Name BTScan | Remove-Job -Force
 do
 {
+    $ScriptBlock = { hcitool lescan --duplicates > /home/pi/PiHomeControl/BTScan.results }
+    Start-Job -name BTScan -ScriptBlock $ScriptBlock
+    Start-Sleep -Seconds 60
     if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
-    Start-Sleep -Seconds 20
     if (Test-Path /home/pi/PiHomeControl/BTScan.results) 
     { 
         Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
@@ -52,6 +52,7 @@ do
         }
         Remove-Item /home/pi/PiHomeControl/BTScan.reading
     }
+    Get-Job -Name BTScan | Remove-Job -Force
 } until ($Something)
 
 <#foreach ($MACAddress in (Get-EQ3Thermostats)) 
