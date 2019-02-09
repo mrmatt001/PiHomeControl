@@ -30,6 +30,7 @@ do
                 $Description = $Line.Split(' ')[1].Trim()
                 if ($MACAddress -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
+                    $Description
                     if ($Description -match 'CC-RT-M-BLE') 
                     { 
                         Write-Host ("EQ3 " + $Line) -ForegroundColor Red
