@@ -61,8 +61,7 @@ do
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
                     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
                     Write-Host "Getting temp: $_"
-                    [string]$Temperature = ([Convert]::ToInt64(($Matches.Temp),16)/2)
-                    #[string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
+                    [string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
                     $Temp = (($Temperature -as [decimal]) * 2) -as [int32]
                     $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
                     Write-Host $Statement -ForegroundColor Green
