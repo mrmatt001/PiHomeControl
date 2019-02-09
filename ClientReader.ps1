@@ -64,15 +64,17 @@ do
                 { 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
                     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
-                    
-                    get-job -Name $_ | Remove-Job -Force
                     Write-Host "Triggering job: $_"
                     $scriptBlock = [scriptblock]::Create("gatttool -b " + $_ + ' --char-write-req -a "0x0411" -n "03" --listen')
                     $Job = (Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $_)
-                    $RunningJobIds += $Job.Name
+                    $RunningJobs += $Job.Name
                 } 
             }
 
+            Write-Host "********"
+            foreach ($Job in $RunningJobs) { Get-Job -Name $Job}
+            Write-Host "********"
+            
             do
             {
                 $CompletedJobs = 0
