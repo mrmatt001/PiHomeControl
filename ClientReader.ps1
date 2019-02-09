@@ -30,16 +30,16 @@ do
                     if ($BluetoothDevices.Keys -notcontains $Line.Split(' ')[0]) 
                     { 
                         $BluetoothDevices.Add($Line.Split(' ')[0],$Line.Split(' ')[1].Trim()) 
+                        $MACAddress = $Line.Split(' ')[0].Trim()
+                        Write-Host "Updating PostreSQL with $MACAddress"
+                        $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
+                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                     }
                     else 
                     {
                         $BluetoothDevices.($Line.Split(' ')[0]) = $Line.Split(' ')[1]
                     }
-                    Write-Host "Updating PostreSQL"
-                    $MACAddress = $Line.Split(' ')[0].Trim()
-                    $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
-                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
-        
+                    
                 }
                 else 
                 {
