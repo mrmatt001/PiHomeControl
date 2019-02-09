@@ -24,13 +24,12 @@ do
     { 
         if ((get-item /home/pi/PiHomeControl/BTScan.results).Length -gt 0) 
         {
-            Write-Host "stuff to do"
             foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.results))
             {
                 $MACAddress = $Line.Split(' ')[0].Trim()
                 $Description = $Line.Split(' ')[1].Trim()
                 $MACAddress
-                if ($Description -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
+                if ($MACAddress -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
                     if ($Description -match 'CC-RT-M-BLE') 
                     { 
