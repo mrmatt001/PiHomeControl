@@ -25,8 +25,7 @@ do
         if ((get-item /home/pi/PiHomeControl/BTScan.results).Length -gt 0) 
         {
             Write-Host "stuff to do"
-            Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
-            foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
+            foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.results))
             {
                 $MACAddress = $Line.Split(' ')[0].Trim()
                 $Description = $Line.Split(' ')[1].Trim()
@@ -58,7 +57,7 @@ do
                 }
             }
             $BluetoothDevices
-            Remove-Item /home/pi/PiHomeControl/BTScan.reading
+            Remove-Item /home/pi/PiHomeControl/BTScan.results
         }
     }
     if (Get-Job -Name BTScan -ErrorAction SilentlyContinue) { Get-Job -Name BTScan | Remove-Job -Force }
