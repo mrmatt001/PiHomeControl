@@ -58,8 +58,7 @@ do
             }
             Remove-Item /home/pi/PiHomeControl/BTScan.reading
             #$BluetoothDevices
-            $BluetoothDevices.Keys | % 
-            { 
+            $BluetoothDevices.Keys | % { 
                 if ($BluetoothDevices.Item($_) -eq 'CC-RT-M-BLE') 
                 { 
                     #key = $_ , value = " + $BluetoothDevices.Item($_) 
