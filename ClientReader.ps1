@@ -68,8 +68,8 @@ do
                     get-job -Name $_ | Remove-Job -Force
                     Write-Host "Triggering job: $_"
                     $RunningJobs += $_
-                    $scriptBlock = [scriptblock]::Create("gatttool -b " + $MACAddress + ' --char-write-req -a "0x0411" -n "03" --listen')
-                    $Job = (Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $MACAddress)
+                    $scriptBlock = [scriptblock]::Create("gatttool -b " + $_ + ' --char-write-req -a "0x0411" -n "03" --listen')
+                    Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $_
                 } 
             }
 
