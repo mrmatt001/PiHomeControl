@@ -28,6 +28,7 @@ do
             {
                 $MACAddress = $Line.Split(' ')[0].Trim()
                 $Description = $Line.Split(' ')[1].Trim()
+                $Description
                 if ($MACAddress -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
                     $Description
