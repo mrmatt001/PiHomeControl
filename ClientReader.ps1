@@ -63,7 +63,7 @@ do
                 { 
                     #key = $_ , value = " + $BluetoothDevices.Item($_) 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
-                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
                 } 
             }
         }
