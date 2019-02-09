@@ -28,8 +28,8 @@ do
             Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
             foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
             {
-                $MACAddress = $Line.Split(' ')[0]
-                $Description = $Line.Split(' ')[1]
+                $MACAddress = $Line.Split(' ')[0].Trim()
+                $Description = $Line.Split(' ')[1].Trim()
                 $MACAddress
                 $Description
                 if ($Description -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
