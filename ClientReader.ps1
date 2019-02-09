@@ -33,13 +33,9 @@ do
                 {
                     if ($Description -match 'CC-RT-M-BLE') 
                     { 
-                        #Write-Host ("EQ3 " + $Line) -ForegroundColor Green
-                        #$Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
-                        #Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                         if ($BluetoothDevices.Keys -notcontains $MACAddress) 
                         { 
                             $BluetoothDevices.Add("$MACAddress","$Description") 
-                            #Write-Host "Updating PostreSQL with $MACAddress"
                         }
                         else 
                         {
@@ -64,45 +60,13 @@ do
                 { 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
                     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
-                    Write-Host "Triggering job: $_"
-                    $scriptBlock = [scriptblock]::Create("gatttool -b " + $_ + ' --char-write-req -a "0x0411" -n "03" --listen')
-                    $Job = (Start-Job -Name $_ -ScriptBlock $scriptBlock -ArgumentList $_)
-                    $RunningJobs += $Job.Name
-                } 
-            }
-
-            Write-Host "********"
-            foreach ($Job in $RunningJobs) { Get-Job -Name $Job}
-            Write-Host "********"
-            
-            do
-            {
-                $CompletedJobs = 0
-                foreach ($Job in $RunningJobs)
-                {
-                    #$JobOutput = Get-Job -Name $Job -ErrorAction SilentlyContinue | Receive-Job -Keep
-                    Get-Job -Name $Job | Receive-Job -Keep
-                    if ((Get-Job -Name $Job | Receive-Job -Keep) -match 'Characteristic') { $CompletedJobs++ }
-                    Write-Host "Completed $CompletedJobs of " ($RunningJobs).Count
-                }
-            } until (((((Get-Date).AddSeconds(-30) -gt $JobStartTime))) -or ($CompletedJobs -eq ($RunningJobs).Count))
-
-            foreach ($Job in $RunningJobs)
-            {
-                $TempOutput = Get-Job -Name $Job | Receive-Job
-                $null = Get-Job -Name $Job | Remove-Job -Force
-                foreach ($Line in $TempOutput)
-                {
-                    if ($Line -match 'Notification handle\s+\=\s+\dx\d+\svalue:\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s[a-zA-Z0-9]+\s(?<Temp>[a-zA-Z0-9]+)') 
-                    { 
-                        [string]$Temperature = ([Convert]::ToInt64(($Matches.Temp),16)/2)
-                        #[string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
-                        $Temp = (($Temperature -as [decimal]) * 2) -as [int32]
-                        $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$Job'";
-                        Write-Host $Statement -ForegroundColor Green
-                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
-                
-                    }
+                    Write-Host "Getting temp: $_"
+                    [string]$Temperature = ([Convert]::ToInt64(($Matches.Temp),16)/2)
+                    #[string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
+                    $Temp = (($Temperature -as [decimal]) * 2) -as [int32]
+                    $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
+                    Write-Host $Statement -ForegroundColor Green
+                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                 }
             }
         }
