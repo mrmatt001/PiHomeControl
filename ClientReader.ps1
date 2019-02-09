@@ -62,7 +62,6 @@ do
             $BluetoothDevices.Keys | % { 
                 if ($BluetoothDevices.Item($_) -eq 'CC-RT-M-BLE') 
                 { 
-                    #key = $_ , value = " + $BluetoothDevices.Item($_) 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
                     Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
                     
@@ -81,7 +80,7 @@ do
                 {
                     $JobOutput = Get-Job -Name $Job -ErrorAction SilentlyContinue | Receive-Job -Keep
                     if ($JobOutput -match 'Characteristic') { $CompletedJobs++ }
-                    Write-Host "Completed $CompletedJobs of " $RunningJobs).Count
+                    Write-Host "Completed $CompletedJobs of " ($RunningJobs).Count
                 }
             } until (((((Get-Date).AddSeconds(-30) -gt $JobStartTime))) -or ($CompletedJobs -eq ($RunningJobs).Count))
 
