@@ -11,7 +11,7 @@ systemctl stop bluetooth
 systemctl start bluetooth
 $BluetoothDevices = @{}
 
-Get-Job -Name BTScan | Remove-Job -Force
+if (Get-Job -Name BTScan -ErrorAction SilentlyContinue) { Get-Job -Name BTScan | Remove-Job -Force }
 do
 {
     $ScriptBlock = { hcitool lescan --duplicates > /home/pi/PiHomeControl/BTScan.results }
@@ -52,7 +52,7 @@ do
         }
         Remove-Item /home/pi/PiHomeControl/BTScan.reading
     }
-    Get-Job -Name BTScan | Remove-Job -Force
+    if (Get-Job -Name BTScan -ErrorAction SilentlyContinue) { Get-Job -Name BTScan | Remove-Job -Force }
 } until ($Something)
 
 <#foreach ($MACAddress in (Get-EQ3Thermostats)) 
