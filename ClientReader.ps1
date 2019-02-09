@@ -22,7 +22,7 @@ do
     if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
     if (Test-Path /home/pi/PiHomeControl/BTScan.results) 
     { 
-        if ((get-item ./BTScan.results).Length -gt 0) 
+        if ((get-item /home/pi/PiHomeControl/BTScan.results).Length -gt 0) 
         {
             Write-Host "stuff to do"
             Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
@@ -30,6 +30,8 @@ do
             {
                 $MACAddress = $Line.Split(' ')[0]
                 $Description = $Line.Split(' ')[1]
+                $MACAddress
+                $Description
                 if ($Description -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
                     if ($Description -match 'CC-RT-M-BLE') 
