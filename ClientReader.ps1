@@ -1,10 +1,10 @@
 Import-Module /home/pi/PiHomeControl/PiHomeControl.psm1 -Force
 
 modprobe btusb
-systemctl stop bluetooth
-systemctl start bluetooth
-hciconfig hci0 down
-hciconfig hci0 up
+#systemctl stop bluetooth
+#systemctl start bluetooth
+#hciconfig hci0 down
+#hciconfig hci0 up
 #$ScanOnJob = Start-Job -ScriptBlock {
     "scan on" | bluetoothctl #}
 #do { Start-Sleep -Milliseconds 100 } until ((Get-Job -Id $ScanOnJob.Id).State -eq 'Completed')

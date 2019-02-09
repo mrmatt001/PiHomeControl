@@ -39,8 +39,8 @@ function Get-EQ3Temperature
 
 function Get-EQ3Thermostats
 {
-    modprobe btusb
-    systemctl start bluetooth
+    #modprobe btusb
+    #systemctl start bluetooth
     "scan on" | bluetoothctl
     Start-Sleep -seconds 10
     $MACAddresses = @()

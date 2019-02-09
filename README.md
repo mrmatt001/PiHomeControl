@@ -79,6 +79,12 @@ Install a Postgres instance. I've followed the guide at https://sondregronas.com
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pitoeq3 TO dbuser;"
     sudo -u postgres psql homecontrol -c "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO dbuser;"
 
+## If the Pi is not running Postgres Install NpgSQL
+Once the database is installed we also need to install NpgSQL on the Pi to be able to talk to the Database. This is included in the function Install-Postgres so is only required if that hasn't been run on the Pi.  
+
+    Register-PackageSource -Name "nugetv2" -ProviderName NuGet -Location "http://www.nuget.org/api/v2/"
+    Install-Package NpgSQL -Force| Out-Null
+
 ## Register each Raspberry Pi to the Postrgres DB
 
     Register-PiDevice -DBServer {DBServer} -DBName homecontrol -DBUser dbuser -DBPassword {PASSWORD}
