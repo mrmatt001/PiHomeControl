@@ -19,7 +19,7 @@ do
     
     Start-Sleep -Seconds 30
     
-    if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
+    if (Test-Path /home/pi/PiHomeControl/BTScan.results) { Remove-Item /home/pi/PiHomeControl/BTScan.results }
     if (Test-Path /home/pi/PiHomeControl/BTScan.results) 
     { 
         if ((get-item /home/pi/PiHomeControl/BTScan.results).Length -gt 0) 
