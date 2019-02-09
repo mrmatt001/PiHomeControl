@@ -28,36 +28,36 @@ do
             Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
             foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
             {
-                $Line
-                if ($Line.Split(' ')[0] -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
+                $MACAddress = $Line.Split(' ')[0]
+                $Description = $Line.Split(' ')[1]
+                if ($Description -match '[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]')
                 {
-                    Write-Host ("MAC Address " + $Line.Split(' ')[0]) -ForegroundColor Green
-                    if ($Line.Split(' ')[1] -match 'CC-RT-M-BLE') 
+                    if ($Description -match 'CC-RT-M-BLE') 
                     { 
                         Write-Host ("EQ3 " + $Line) -ForegroundColor Red
-                        if ($BluetoothDevices.Keys -notcontains $Line.Split(' ')[0]) 
+                        if ($BluetoothDevices.Keys -notcontains $MACAddress) 
                         { 
-                            $BluetoothDevices.Add($Line.Split(' ')[0],$Line.Split(' ')[1].Trim()) 
-                            $MACAddress = $Line.Split(' ')[0].Trim()
+                            $BluetoothDevices.Add($MACAddress,$Description) 
                             Write-Host "Updating PostreSQL with $MACAddress"
                             $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$MACAddress'";
                             Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                         }
                         else 
                         {
-                            $BluetoothDevices.($Line.Split(' ')[0]) = $Line.Split(' ')[1]
+                            $BluetoothDevices.($MACAddress) = $Description
                         }
                         
                     }
                     else 
                     {
-                        if ($BluetoothDevices.Keys -notcontains $Line.Split(' ')[0]) 
+                        if ($BluetoothDevices.Keys -notcontains $MACAddress) 
                         { 
-                            $BluetoothDevices.Add($Line.Split(' ')[0],$Line.Split(' ')[1].Trim()) 
+                            $BluetoothDevices.Add($MACAddress,$Description) 
                         }    
                     }
                 }
             }
+            $BluetoothDevices
             Remove-Item /home/pi/PiHomeControl/BTScan.reading
         }
     }
