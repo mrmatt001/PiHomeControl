@@ -53,9 +53,7 @@ do
                 }
             }
             Remove-Item /home/pi/PiHomeControl/BTScan.reading
-            $RunningJobs = @()
-            $JobsStartTime = (Get-Date)
-            $BluetoothDevices.Keys | % { 
+            $BluetoothDevices.Keys | ForEach-Object { 
                 if ($BluetoothDevices.Item($_) -eq 'CC-RT-M-BLE') 
                 { 
                     $Statement = "INSERT INTO eq3thermostats (eq3macaddress) SELECT '$_'";
@@ -63,9 +61,12 @@ do
                     Write-Host "Getting temp: $_"
                     [string]$Temperature = (Get-EQ3Temperature -MACAddress $_)
                     $Temp = (($Temperature -as [decimal]) * 2) -as [int32]
-                    $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
-                    Write-Host $Statement -ForegroundColor Green
-                    Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                    if ($Temp -ne 0)
+                    {
+                        $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
+                        Write-Host $Statement -ForegroundColor Green
+                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                    }
                 }
             }
         }
