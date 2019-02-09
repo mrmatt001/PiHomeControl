@@ -18,7 +18,7 @@ do
 {
     if (Test-Path /home/pi/PiHomeControl/BTScan.reading) { Remove-Item /home/pi/PiHomeControl/BTScan.reading }
     Start-Sleep -Seconds 20
-    if (Test-Path /home/pi/PiHomeControl/BTScan.reading) 
+    if (Test-Path /home/pi/PiHomeControl/BTScan.results) 
     { 
         Rename-Item /home/pi/PiHomeControl/BTScan.results BTScan.reading
         foreach ($Line in (Get-Content /home/pi/PiHomeControl/BTScan.reading))
