@@ -34,6 +34,7 @@ do
                     Write-Host ("MAC Address " + $Line.Split(' ')[0]) -ForegroundColor Green
                     if ($Line.Split(' ')[1] -match 'CC-RT-M-BLE') 
                     { 
+                        Write-Host ("EQ3 " + $Line -ForegroundColor Red
                         if ($BluetoothDevices.Keys -notcontains $Line.Split(' ')[0]) 
                         { 
                             $BluetoothDevices.Add($Line.Split(' ')[0],$Line.Split(' ')[1].Trim()) 
