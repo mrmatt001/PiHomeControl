@@ -74,7 +74,7 @@ do
                         $update = "UPDATE pitoeq3 SET lastdetected='$ScanDate' WHERE pihostname='$ComputerName' AND eq3macaddress='$_'";
                         if (!(Write-ToPostgreSQL -Statement $insert -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword))
                         {
-                            Write-ToPostgreSQL -Statement $update -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                            Write-ToPostgreSQL -Statement $update -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
                         }
                     }
                 }
