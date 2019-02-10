@@ -73,6 +73,8 @@ do
                         $insert = "INSERT INTO pitoeq3(pihostname, eq3macaddress, lastdetected) VALUES ('$ComputerName','$_','$ScanDate')"
                         $update = "UPDATE pitoeq3 SET lastdetected='$ScanDate' WHERE pihostname='$ComputerName' AND eq3macaddress='$_'";
                         $Result = Write-ToPostgreSQL -Statement $update -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                        $Result
+                        $Result.GetType()
                         if ($Result) 
                         { 
                             "Update succeeded"
