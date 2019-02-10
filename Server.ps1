@@ -50,4 +50,5 @@ foreach ($MACAddress in (Connect-Tcp -hostname $Hostname -port $Port -Message "G
 {
     Write-Host ("Temperature on $MACAddress " + (Connect-Tcp -hostname $Hostname -port $Port -Message "Get-EQ3Temperature -MACAddress $MACAddress"))
 }
-#Connect-Tcp -hostname 192.168.50.76 -port 3339 -Message "quit"
+#
+Connect-Tcp -hostname pihomecontrol1 -port 3339 -Message "quit"

@@ -27,18 +27,22 @@ $syncHash = [hashtable]::Synchronized(@{})
 $syncHash.RoomTemps = @{}
 $RoomNumber = 1
 $syncHash.Rooms = @()
-foreach ($EQ3Thermostat in (Read-FromPostgreSQL -DBServer 192.168.150.1 -DBName homecontrol -DBUser dbuser -DBPassword Password123 -Query 'select * from eq3thermostats ORDER BY eq3id')) 
+foreach ($EQ3Thermostat in (Read-FromPostgreSQL -DBServer 192.168.50.150 -DBName homecontrol -DBUser dbuser -DBPassword dbuserpwd123 -Query 'select * from eq3thermostats ORDER BY eq3macaddress')) 
 { 
-    $RoomInfo = [PSCustomObject]@{
-    RoomNumber = "Room" + ($RoomNumber++)
-    MACAddress = $EQ3Thermostat.eq3macaddress
-    FriendlyName = $EQ3Thermostat.friendlyname
-    CurrentTemperature = $EQ3Thermostat.currenttemperature
+    if ($EQ3Thermostat.currenttemperature.GetType().Name -ne 'DBNull')
+    {
+        #[DECIMAL]$SyncHash.Temperature1 = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
+        $Temp = ($EQ3Thermostat.currenttemperature / 2) -as [decimal]
+        $RoomInfo = [PSCustomObject]@{
+        RoomNumber = "Room" + ($RoomNumber++)
+        MACAddress = $EQ3Thermostat.eq3macaddress
+        FriendlyName = $EQ3Thermostat.friendlyname
+        CurrentTemperature = $Temp
+        }
+        $syncHash.Rooms += $RoomInfo
+        $syncHash.RoomTemps.Add($EQ3Thermostat.eq3macaddress,$Temp)
+        #  $syncHash.RoomTemps.($EQ3Thermostat.eq3macaddress) = $EQ3Thermostat.currenttemperature
     }
-    $syncHash.Rooms += $RoomInfo
-
-    $syncHash.RoomTemps.Add($EQ3Thermostat.eq3macaddress,$EQ3Thermostat.currenttemperature)
-    #  $syncHash.RoomTemps.($EQ3Thermostat.eq3macaddress) = $EQ3Thermostat.currenttemperature
 }
 
 $syncHash.HotterBase64 = "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"
@@ -441,12 +445,26 @@ $syncHash.Window.Dispatcher.invoke("Normal", [action][scriptblock]::create( {
     $syncHash.SearchTextBox.Focus() | out-null 
     }))
 
+$syncHash.LockTemps = $false
 $LastOnlineCheckDate = (Get-Date).AddSeconds(-30)
 do
 {
+    if ($syncHash.LockTemps -eq $false)
+    {
+        foreach ($EQ3Thermostat in (Read-FromPostgreSQL -DBServer 192.168.50.150 -DBName homecontrol -DBUser dbuser -DBPassword dbuserpwd123 -Query 'select * from eq3thermostats ORDER BY eq3macaddress')) 
+        { 
+            if ($EQ3Thermostat.currenttemperature.GetType().Name -ne 'DBNull')
+            {
+                [decimal]$Temp = ($EQ3Thermostat.currenttemperature / 2) -as [decimal]
+                $syncHash.RoomTemps.($EQ3Thermostat.eq3macaddress) = $Temp
+                $syncHash.RoomTemps
+            }
+        }
+    }
+    
     if ($LastOnlineCheckDate.AddSeconds(30) -lt (Get-Date))
     {
-        if (!(Read-FromPostgreSQL -DBServer 192.168.150.1 -DBName homecontrol -DBUser dbuser -DBPassword Password123 -Query 'select * from pidevices')) 
+        if (!(Read-FromPostgreSQL -DBServer 192.168.50.150 -DBName homecontrol -DBUser dbuser -DBPassword dbuserpwd123 -Query 'select * from eq3thermostats')) 
         { 
             $SystemOnline = $false 
         }
@@ -456,7 +474,7 @@ do
         }    
         $LastOnlineCheckDate = (Get-Date)
     }
-
+    
     if ($SystemOnline)
     {
         if ($syncHash.RoomButtonClicked -ne $false)
@@ -466,8 +484,8 @@ do
             $syncHash.RoomButtonClicked = $false
             $TempMACAddress = ($syncHash.Rooms | Where-Object { $_.RoomNumber -eq $syncHash.RoomSelected }).MACAddress
             #Get MAC Address for roomselected
-            $syncHash.CurrentRoomLabel = ((Read-FromPostgreSQL -DBServer 192.168.150.1 -DBName homecontrol -DBUser dbuser -DBPassword Password123 -Query "select * from eq3thermostats where eq3macaddress = '$TempMACAddress'")).eq3macaddress 
-            if ((((Read-FromPostgreSQL -DBServer 192.168.150.1 -DBName homecontrol -DBUser dbuser -DBPassword Password123 -Query "select * from eq3thermostats where eq3macaddress = '$TempMACAddress'")).friendlyname) -match '^[0-9a-zA-Z]') { $syncHash.CurrentRoomLabel = (($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).FriendlyName) }
+            $syncHash.CurrentRoomLabel = ((Read-FromPostgreSQL -DBServer 192.168.50.150 -DBName homecontrol -DBUser dbuser -DBPassword dbuserpwd123 -Query "select * from eq3thermostats where eq3macaddress = '$TempMACAddress'")).eq3macaddress 
+            if ((((Read-FromPostgreSQL -DBServer 192.168.50.150 -DBName homecontrol -DBUser dbuser -DBPassword dbuserpwd123 -Query "select * from eq3thermostats where eq3macaddress = '$TempMACAddress'")).friendlyname) -match '^[0-9a-zA-Z]') { $syncHash.CurrentRoomLabel = (($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).FriendlyName) }
             $syncHash.Window.Dispatcher.invoke("Normal", [action][scriptblock]::create({
                 $syncHash.RoomSelection.Text = $syncHash.CurrentRoomLabel
                 }))
@@ -511,7 +529,7 @@ do
                     }))
                 Set-Focus
                 $TempMACAddress = (($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
-                Set-EQ3FriendlyName -DBServer 192.168.150.1 -DBName homecontrol -DBUser dbuser -DBPassword Password123 -EQ3MACAddress $TempMACAddress -FriendlyName $syncHash.RoomSelectionText
+                Set-EQ3FriendlyName -DBServer 192.168.50.150 -DBName homecontrol -DBUser dbuser -DBPassword dbuserpwd123 -EQ3MACAddress $TempMACAddress -FriendlyName $syncHash.RoomSelectionText
             }
         }
 
@@ -527,9 +545,8 @@ do
         {
             $syncHash.RoomSelected
             $syncHash.RoomChanged = $false
-            $SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
-            if ($syncHash.Temperature -notmatch '\.5') { $TempExtension = ".0ºC" } else { $TempExtension = "ºC" }
-            $syncHash.DisplayTemp = $SyncHash.Temperature.ToString() + $TempExtension
+            [decimal]$SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
+            $syncHash.DisplayTemp = $SyncHash.Temperature.ToString() + "ºC"
             $syncHash.DisplayTemp
             $syncHash.Window.Dispatcher.invoke("Normal", [action][scriptblock]::create( {
                 $syncHash.TempPlus.Visibility = "Visible"
@@ -542,14 +559,14 @@ do
         if ($SyncHash.TempPlusPressed -eq $true)
         {
             $SyncHash.TempPlusPressed = $false
-            $SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
+            [decimal]$SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
             $SyncHash.CanChangeRoom = $false
-            if ($syncHash.Temperature -ne $syncHash.MaxTemperature)
+            if ($syncHash.Temperature -ne $syncHash.MinTemperature)
             {
                 $syncHash.Temperature = $syncHash.Temperature + 0.5
+                $syncHash.LockTemps = $true
                 $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress) = $syncHash.Temperature
-                if ($syncHash.Temperature -notmatch '\.5') { $TempExtension = ".0ºC" } else { $TempExtension = "ºC" }
-                $syncHash.DisplayTemp = ($syncHash.Temperature.ToString() + $TempExtension)
+                $syncHash.DisplayTemp = ($syncHash.Temperature.ToString() + "ºC")
                 $syncHash.Window.Dispatcher.invoke("Normal", [action][scriptblock]::create( {
                     $syncHash.SetTemperature.Content = $SyncHash.DisplayTemp
                     $syncHash.Hidden.Focus()
@@ -561,14 +578,14 @@ do
         if ($SyncHash.TempMinusPressed -eq $true)
         {
             $SyncHash.TempMinusPressed = $false
-            $SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
+            [decimal]$SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
             $SyncHash.CanChangeRoom = $false
             if ($syncHash.Temperature -ne $syncHash.MinTemperature)
             {
                 $syncHash.Temperature = $syncHash.Temperature - 0.5
+                $syncHash.LockTemps = $true
                 $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress) = $syncHash.Temperature
-                if ($syncHash.Temperature -notmatch '\.5') { $TempExtension = ".0ºC" } else { $TempExtension = "ºC" }
-                $syncHash.DisplayTemp = ($syncHash.Temperature.ToString() + $TempExtension)
+                $syncHash.DisplayTemp = ($syncHash.Temperature.ToString() + "ºC")
                 $syncHash.Window.Dispatcher.invoke("Normal", [action][scriptblock]::create( {
                     $syncHash.SetTemperature.Content = $SyncHash.DisplayTemp
                     $syncHash.Hidden.Focus()
@@ -582,9 +599,11 @@ do
             if ((Get-Date) -gt (($syncHash.ButtonPressed).AddSeconds(1.5)))
             {
                 $syncHash.ButtonPressed = $false
-                [string]$SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
+                [decimal]$SyncHash.Temperature = $syncHash.RoomTemps.(($syncHash.Rooms | Where-Object {$_.RoomNumber -eq $RoomSelected}).MACAddress)
                 $SyncHash.Temperature
-                Write-Host ("$RoomSelected is set to: " + $SyncHash.Temperature.ToString())
+                Write-Host ("$RoomSelected is set to: " + $SyncHash.Temperature.ToString() + "ºC")
+                $syncHash.LockTemps = $false
+                $syncHash.LockTemps
                 $SyncHash.CanChangeRoom = $true
                 if ($syncHash.ChangeToFutureRoom)
                 {

@@ -5,6 +5,9 @@ $DBUser = "dbuser"
 $DBPassword = "dbuserpwd123"
 
 Import-Module /home/pi/PiHomeControl/PiHomeControl.psm1 -Force
+$ComputerName = (hostname)
+$Statement = "INSERT INTO pidevices (pihostname, ostype) SELECT '$ComputerName', 'linuxps'";
+Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
 
 $BluetoothDevices = @{}
 
@@ -64,7 +67,12 @@ do
                     if ($Temp -ne 0)
                     {
                         $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
-                        Write-Host $Statement -ForegroundColor Green
+                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                    
+                        $ScanDate = (Get-Date)
+                        $insert = "INSERT INTO pitoeq3(pihostname, eq3macaddress, lastdetected) VALUES ('$ComputerName','$_','$ScanDate')"
+                        $upsert = "UPDATE pidevices SET lastdetected='$ScanDate' WHERE pihostname='$ComputerName' AND eq3macaddress='$_'";
+                        $Statement = "WITH upsert AS ($upsert RETURNING *) $insert WHERE NOT EXISTS (SELECT * FROM upsert)"
                         Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
                     }
                 }
@@ -73,12 +81,3 @@ do
     }
     if (Get-Job -Name BTScan -ErrorAction SilentlyContinue) { Get-Job -Name BTScan | Remove-Job -Force }
 } until ($Something)
-
-<#foreach ($MACAddress in (Get-EQ3Thermostats)) 
-{ 
-    $MACAddress
-    Get-EQ3Temperature -MACAddress $MACAddress 
-}
-
-foreach ($MACAddress in (Get-EQ3Thermostats)) { Set-EQ3Temperature -MACAddress $MACAddress -Temperature 22 }
-#>

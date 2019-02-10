@@ -110,7 +110,7 @@ function Install-HomeControlDB
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3macaddress VarChar(17) PRIMARY KEY NOT NULL,friendlyname VarChar(50),currenttemperature INT);'
-    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL);'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL, lastdetected TIMESTAMP);'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS bluetoothdevices(btmacaddress VarChar(17) PRIMARY KEY,friendlyname VarChar(30));'
     sudo -u postgres psql homecontrol -c "GRANT ALL ON pidevices TO $DBUser;"
     sudo -u postgres psql homecontrol -c "GRANT ALL ON eq3thermostats TO $DBUser;"
@@ -272,4 +272,38 @@ function Install-AccessPoint([STRING]$SSID,[STRING]$SSIDPassword)
     sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
     (Get-Content /etc/rc.local).replace('exit 0','iptables-restore < /etc/iptables.ipv4.nat') | Set-Content /etc/rc.local
     Add-Content -Path /etc/rc.local -Value "exit 0"
+}
+
+function Connect-Tcp()
+{
+    param(
+        [string]$hostname,
+        [Int32]$port,
+        [string]$Message
+    )
+     
+    try
+    {
+        $client = New-Object -TypeName System.Net.Sockets.TcpClient -ArgumentList $hostname,$port
+        $stream = $client.GetStream()
+         
+        $buffer = [System.Text.Encoding]::ASCII.GetBytes($Message)
+        $stream.Write($buffer, 0, $buffer.Length)
+         
+        $receiveBuffer = New-Object -TypeName byte[] -ArgumentList $buffer.Length
+        $EndLoop = $false
+        $Output = @()
+        do
+        {
+            $stream.Read($receiveBuffer, 0, ($receiveBuffer.Length-1)) | Out-Null
+            $receivedText = [System.Text.Encoding]::ASCII.GetString($receiveBuffer)
+            if ($receivedText -notmatch "!") { $Output += $receivedText }
+        } until ($receivedText -match "!") 
+        $stream.Close()
+        $client.Close()
+        $Output
+    } Catch [Exception]
+    {
+        Write-Host "Could not connect to target machine"
+    }
 }
