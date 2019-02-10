@@ -71,11 +71,11 @@ do
                     
                         $ScanDate = (Get-Date)
                         $insert = "INSERT INTO pitoeq3(pihostname, eq3macaddress, lastdetected) VALUES ('$ComputerName','$_','$ScanDate')"
-                        $upsert = "UPDATE pitoeq3 SET lastdetected='$ScanDate' WHERE pihostname='$ComputerName' AND eq3macaddress='$_'";
-                        if (!(Write-ToPostgreSQL -Statement $upsert -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword))
-                        {
-                            Write-ToPostgreSQL -Statement $insert -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
-                        }
+                        $update = "UPDATE pitoeq3 SET lastdetected='$ScanDate' WHERE pihostname='$ComputerName' AND eq3macaddress='$_'";
+                        $Result = Write-ToPostgreSQL -Statement $update -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                        if (!$Result) { "Update failed"} else {"Update succeeded"}
+                        $Result = Write-ToPostgreSQL -Statement $insert -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                        if (!$Result) { "Insert failed"} else {"Insert succeeded"} 
                     }
                 }
             }

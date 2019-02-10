@@ -108,7 +108,7 @@ function Install-HomeControlDB
     sudo -u postgres psql -c 'CREATE DATABASE homecontrol;'
     sudo -u postgres psql homecontrol -c "create role $DBUser with login password '$UnsecurePassword';"
     Remove-Variable -Name UnsecurePassword -ErrorAction SilentlyContinue
-    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(piid SERIAL PRIMARY KEY,pihostname VarChar(15) NOT NULL,ostype VarChar(10));'
+    sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pidevices(pihostname VarChar(15) PRIMARY KEY,ostype VarChar(10));'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS eq3thermostats(eq3macaddress VarChar(17) PRIMARY KEY NOT NULL,friendlyname VarChar(50),currenttemperature INT);'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS pitoeq3(pihostname VarChar(15) NOT NULL,eq3macaddress VarChar(17) NOT NULL, lastdetected TIMESTAMP);'
     sudo -u postgres psql homecontrol -c 'CREATE TABLE IF NOT EXISTS bluetoothdevices(btmacaddress VarChar(17) PRIMARY KEY,friendlyname VarChar(30));'
