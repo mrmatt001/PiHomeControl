@@ -67,7 +67,7 @@ do
                     if ($Temp -ne 0)
                     {
                         $Statement = "UPDATE eq3thermostats SET currenttemperature='$Temp' WHERE eq3macaddress='$_'";
-                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword
+                        Write-ToPostgreSQL -Statement $Statement -DBServer $DBServer -DBName $DBName -DBPort 5432 -DBUser $DBUser -DBPassword $DBPassword | Out-Null
                     
                         $ScanDate = (Get-Date)
                         $insert = "INSERT INTO pitoeq3(pihostname, eq3macaddress, lastdetected) VALUES ('$ComputerName','$_','$ScanDate')"
